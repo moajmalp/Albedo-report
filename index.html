@@ -3,1019 +3,878 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Albedo Education — 2025 Performance Report</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Albedo Education — 2025 Performance Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
   :root {
-    --ink: #0d0d0d;
-    --cream: #f8f4ee;
-    --gold: #c8a44a;
-    --gold-light: #e8c97a;
-    --rust: #c84b2f;
-    --teal: #1a6b6b;
-    --teal-light: #2a9090;
-    --silver: #8a8a8a;
-    --border: #d8d2c8;
-    --card-bg: #ffffff;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--ink);
-    line-height: 1.6;
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1f2535;
+    --border: rgba(255,255,255,0.07);
+    --accent: #f5a623;
+    --accent2: #5c9eff;
+    --accent3: #7de8b0;
+    --accent4: #e87de8;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --pkg: #f5a623;
+    --spot: #5c9eff;
   }
 
-  /* ── MASTHEAD ── */
-  .masthead {
-    background: var(--ink);
-    color: var(--cream);
-    padding: 60px 40px 50px;
-    text-align: center;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 28px 36px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: linear-gradient(135deg, #0f1117 0%, #151a26 100%);
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    color: #fff;
+  }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .year-badge {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+
+  /* ── NAV TABS ── */
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    padding: 16px 36px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    padding: 9px 18px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── MONTH SELECTOR ── */
+  .month-bar {
+    display: flex;
+    gap: 6px;
+    padding: 14px 36px;
+    overflow-x: auto;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .month-btn {
+    padding: 5px 13px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .month-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .month-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .month-btn.all-months {
+    background: var(--surface2);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .month-btn.all-months.active {
+    background: var(--accent2);
+    color: #fff;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main { padding: 24px 36px; }
+
+  /* ── KPI CARDS ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
     position: relative;
     overflow: hidden;
   }
-  .masthead::before {
+  .kpi::before {
     content: '';
-    position: absolute; inset: 0;
-    background: repeating-linear-gradient(
-      -45deg,
-      transparent, transparent 20px,
-      rgba(200,164,74,0.04) 20px, rgba(200,164,74,0.04) 21px
-    );
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
   }
-  .masthead-label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 16px;
-  }
-  .masthead h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 6vw, 5rem);
-    font-weight: 900;
-    line-height: 1.05;
-    margin-bottom: 20px;
-  }
-  .masthead h1 em {
-    font-style: normal;
-    color: var(--gold);
-  }
-  .masthead-sub {
-    font-size: 15px;
-    font-weight: 300;
-    color: rgba(248,244,238,0.65);
-    max-width: 480px;
-    margin: 0 auto 36px;
-  }
-  .masthead-stats {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    flex-wrap: wrap;
-    position: relative;
-  }
-  .masthead-stat {
-    text-align: center;
-  }
-  .masthead-stat .val {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--gold);
-    display: block;
-  }
-  .masthead-stat .lbl {
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(248,244,238,0.5);
-  }
+  .kpi.blue::before { background: var(--accent2); }
+  .kpi.green::before { background: var(--accent3); }
+  .kpi.pink::before { background: var(--accent4); }
+  .kpi-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+  .kpi-value { font-family: 'DM Serif Display', serif; font-size: 28px; color: #fff; }
+  .kpi-sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
 
-  /* ── NAV ── */
-  .nav {
-    background: var(--card-bg);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .nav::-webkit-scrollbar { display: none; }
-  .nav a {
-    display: block;
-    padding: 16px 24px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--silver);
-    white-space: nowrap;
-    transition: color .2s, border-color .2s;
-    border-bottom: 3px solid transparent;
-  }
-  .nav a:hover, .nav a.active {
-    color: var(--ink);
-    border-color: var(--gold);
-  }
-
-  /* ── LAYOUT ── */
-  .container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 32px;
-  }
-  section {
-    padding: 64px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  section:last-child { border-bottom: none; }
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 40px;
-  }
+  /* ── SECTION TITLE ── */
   .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.9rem;
-    font-weight: 700;
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: #fff;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-  .section-sub {
-    font-size: 13px;
-    color: var(--silver);
-    font-weight: 400;
-  }
-  .divider {
+  .section-title::after {
+    content: '';
     flex: 1;
     height: 1px;
     background: var(--border);
-    margin-left: 16px;
   }
 
-  /* ── KPI STRIP ── */
-  .kpi-strip {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 48px;
-  }
-  .kpi {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    padding: 24px 28px;
-    position: relative;
-    overflow: hidden;
-  }
-  .kpi::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0;
-    width: 100%;
-    height: 3px;
-    background: var(--gold);
-  }
-  .kpi-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--silver);
-    margin-bottom: 8px;
-  }
-  .kpi-value {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.9rem;
-    font-weight: 700;
-  }
-  .kpi-change {
-    font-size: 11px;
-    margin-top: 4px;
-    color: var(--teal);
-  }
-
-  /* ── CHARTS ── */
+  /* ── CHART GRID ── */
   .chart-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 18px;
+    margin-bottom: 24px;
   }
-  .chart-grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  .chart-full { grid-column: 1 / -1; }
-  @media (max-width: 900px) {
-    .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
-  }
-  .card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    padding: 28px;
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--silver);
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .chart-wrap {
-    position: relative;
-    height: 280px;
-  }
-  .chart-wrap-lg {
-    position: relative;
-    height: 340px;
-  }
-  .chart-wrap-sm {
-    position: relative;
-    height: 220px;
-  }
+  .chart-grid.full { grid-template-columns: 1fr; }
+  @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
 
-  /* ── TABLES ── */
-  .table-wrap { overflow-x: auto; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .chart-card h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 16px;
+  }
+  .chart-wrap { position: relative; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin-bottom: 24px; }
   table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
   }
-  th {
-    background: var(--ink);
-    color: var(--cream);
-    font-weight: 600;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 12px 16px;
+  thead th {
+    padding: 10px 14px;
     text-align: left;
-    white-space: nowrap;
-  }
-  td {
-    padding: 10px 16px;
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
     border-bottom: 1px solid var(--border);
-    vertical-align: top;
+    white-space: nowrap;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
   }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(200,164,74,0.05); }
-  .num { font-variant-numeric: tabular-nums; }
-  .bold { font-weight: 600; }
-  .gold-text { color: var(--gold); font-weight: 600; }
-  .teal-text { color: var(--teal); font-weight: 600; }
-  .rust-text { color: var(--rust); }
-  .badge {
+  thead th.num { text-align: right; }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .1s;
+  }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  tbody td { padding: 9px 14px; }
+  tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody td.month-col { font-weight: 600; color: var(--accent); white-space: nowrap; }
+  tbody td.course-col { color: var(--accent2); font-weight: 500; }
+  tbody td.source-col { color: var(--accent3); }
+  tbody td.country-col { color: var(--accent4); }
+  .pkg-val { color: var(--pkg); }
+  .spot-val { color: var(--spot); }
+  tbody tr.total-row td { font-weight: 600; background: var(--surface2); }
+
+  /* ── PILL BADGES ── */
+  .pill {
     display: inline-block;
     padding: 2px 8px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    border-radius: 2px;
-  }
-  .badge-gold { background: rgba(200,164,74,0.15); color: #8a6c1c; }
-  .badge-teal { background: rgba(26,107,107,0.12); color: var(--teal); }
-  .badge-rust { background: rgba(200,75,47,0.1); color: var(--rust); }
-
-  /* ── MONTH FILTER ── */
-  .filter-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-  }
-  .filter-btn {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .15s;
-    font-family: 'DM Sans', sans-serif;
-  }
-  .filter-btn:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
-  .filter-btn.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
-  .filter-btn.gold { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 700; }
-
-  /* ── HEATMAP ── */
-  .heatmap {
-    display: grid;
-    gap: 3px;
-  }
-  .heatmap-row {
-    display: grid;
-    grid-template-columns: 120px repeat(12, 1fr);
-    gap: 3px;
-    align-items: center;
-  }
-  .heatmap-label {
+    border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
-    text-align: right;
-    padding-right: 10px;
-    color: var(--silver);
   }
-  .heatmap-cell {
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 600;
-    cursor: default;
-    transition: transform .1s;
-  }
-  .heatmap-cell:hover { transform: scale(1.15); z-index: 10; }
-  .heatmap-header {
-    grid-template-columns: 120px repeat(12, 1fr);
-  }
-  .heatmap-header .heatmap-cell {
-    font-size: 9px;
-    height: 20px;
-    color: var(--silver);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
+  .pill-yt { background: rgba(245,166,35,.15); color: var(--accent); }
+  .pill-ig { background: rgba(232,125,232,.15); color: var(--accent4); }
+  .pill-ref { background: rgba(125,232,176,.15); color: var(--accent3); }
+  .pill-camp { background: rgba(92,158,255,.15); color: var(--accent2); }
 
-  /* ── FOOTER ── */
-  footer {
-    background: var(--ink);
-    color: rgba(248,244,238,0.4);
-    text-align: center;
-    padding: 32px;
-    font-size: 12px;
-  }
-  footer strong { color: var(--gold); }
+  /* ── HIDDEN VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
 
-  /* ── PROGRESS BARS ── */
-  .bar-row {
-    margin-bottom: 12px;
+  /* ── LEGEND ── */
+  .legend-row {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
   }
-  .bar-top {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    margin-bottom: 4px;
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
   }
-  .bar-name { font-weight: 500; }
-  .bar-val { color: var(--silver); font-size: 11px; }
-  .bar-track {
-    height: 6px;
-    background: var(--border);
-    position: relative;
-  }
-  .bar-fill {
-    height: 100%;
-    background: var(--gold);
-    transition: width .6s ease;
-  }
-  .bar-fill.teal { background: var(--teal); }
-  .bar-fill.rust { background: var(--rust); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.pkg { background: var(--pkg); }
+  .legend-dot.spot { background: var(--spot); }
+  .legend-dot.adm { background: var(--accent3); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 3px; }
 </style>
 </head>
 <body>
 
-<!-- MASTHEAD -->
-<div class="masthead">
-  <p class="masthead-label">Annual Performance Report</p>
-  <h1>Albedo Education<br><em>2025 Analytics</em></h1>
-  <p class="masthead-sub">A comprehensive breakdown of student admissions, revenue, course performance, and growth across all channels — January through December 2025.</p>
-  <div class="masthead-stats">
-    <div class="masthead-stat"><span class="val" id="hl-students">—</span><span class="lbl">Total Students</span></div>
-    <div class="masthead-stat"><span class="val" id="hl-package">—</span><span class="lbl">Total Package (₹)</span></div>
-    <div class="masthead-stat"><span class="val" id="hl-spot">—</span><span class="lbl">Total Spot (₹)</span></div>
-    <div class="masthead-stat"><span class="val" id="hl-courses">—</span><span class="lbl">Active Courses</span></div>
+<header>
+  <div>
+    <h1>Albedo <span>Education</span> — Performance Dashboard</h1>
+    <p>January 2025 – December 2025 · Admissions Analysis</p>
   </div>
-</div>
+  <div class="year-badge">2025 ANNUAL</div>
+</header>
 
-<!-- NAV -->
-<nav class="nav">
-  <a href="#overview" class="active">Overview</a>
-  <a href="#courses">Courses</a>
-  <a href="#sources">Lead Sources</a>
-  <a href="#syllabus">Syllabus</a>
-  <a href="#classes">Classes</a>
-  <a href="#subdivision">Country Package</a>
-  <a href="#monthly">Monthly Detail</a>
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+  <button class="tab-btn" onclick="switchTab('course')">By Course</button>
+  <button class="tab-btn" onclick="switchTab('source')">By Source</button>
+  <button class="tab-btn" onclick="switchTab('country')">By Country</button>
+  <button class="tab-btn" onclick="switchTab('detail')">Full Detail Table</button>
 </nav>
 
-<!-- OVERVIEW -->
-<section id="overview">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Annual Overview</h2>
-      <span class="section-sub">Jan – Dec 2025</span>
-      <div class="divider"></div>
-    </div>
-    <div class="kpi-strip" id="kpi-strip"></div>
-    <div class="chart-grid">
-      <div class="card chart-full">
-        <p class="card-title">Monthly Student Admissions & Revenue</p>
-        <div class="chart-wrap-lg"><canvas id="chartOverview"></canvas></div>
-      </div>
-      <div class="card">
-        <p class="card-title">Package vs Spot — Monthly Comparison</p>
-        <div class="chart-wrap"><canvas id="chartPkgSpot"></canvas></div>
-      </div>
-      <div class="card">
-        <p class="card-title">Spot Rate (Spot ÷ Package) by Month</p>
-        <div class="chart-wrap"><canvas id="chartSpotRate"></canvas></div>
-      </div>
-    </div>
-  </div>
-</section>
+<div class="month-bar" id="monthBar"></div>
 
-<!-- COURSES -->
-<section id="courses">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Course Performance</h2>
-      <span class="section-sub">All months combined + monthly breakdown</span>
-      <div class="divider"></div>
-    </div>
-
-    <div class="chart-grid">
-      <div class="card">
-        <p class="card-title">Top Courses — Total Students</p>
-        <div class="chart-wrap-lg"><canvas id="chartCourseStudents"></canvas></div>
+<main>
+  <!-- OVERVIEW -->
+  <div class="view active" id="view-overview">
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="chart-grid full">
+      <div class="chart-card">
+        <h3>Monthly Admissions &amp; Revenue Trend</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot pkg"></div>Total Package</div>
+          <div class="legend-item"><div class="legend-dot spot"></div>Total Spot</div>
+          <div class="legend-item"><div class="legend-dot adm"></div>Admissions</div>
+        </div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="overviewChart"></canvas>
+        </div>
       </div>
-      <div class="card">
-        <p class="card-title">Top Courses — Package Revenue (₹)</p>
-        <div class="chart-wrap-lg"><canvas id="chartCourseRevenue"></canvas></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:24px">
-      <p class="card-title">Monthly Course Performance — Select Month</p>
-      <div class="filter-row" id="courseMonthFilter"></div>
-      <div class="chart-wrap-lg"><canvas id="chartCourseMonthly"></canvas></div>
-    </div>
-
-    <div class="card" style="margin-top:24px">
-      <p class="card-title">Course Totals Table — Full Year</p>
-      <div class="table-wrap" id="courseTableWrap"></div>
-    </div>
-  </div>
-</section>
-
-<!-- LEAD SOURCES -->
-<section id="sources">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Lead Sources</h2>
-      <span class="section-sub">Source code performance across all months</span>
-      <div class="divider"></div>
     </div>
     <div class="chart-grid">
-      <div class="card">
-        <p class="card-title">Top 15 Sources — Students</p>
-        <div id="sourceBarStudents"></div>
+      <div class="chart-card">
+        <h3>Course Mix — Admissions Share</h3>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="courseDonut"></canvas>
+        </div>
       </div>
-      <div class="card">
-        <p class="card-title">Top 15 Sources — Package Revenue</p>
-        <div id="sourceBarRevenue"></div>
+      <div class="chart-card">
+        <h3>Lead Source Mix — Admissions Share</h3>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="sourceDonut"></canvas>
+        </div>
       </div>
-      <div class="card chart-full">
-        <p class="card-title">Source Trend — Top 5 by Month</p>
-        <div class="chart-wrap-lg"><canvas id="chartSourceTrend"></canvas></div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:24px">
-      <p class="card-title">Source Summary Table — Top 20</p>
-      <div class="table-wrap" id="sourceTableWrap"></div>
-    </div>
-  </div>
-</section>
-
-<!-- SYLLABUS -->
-<section id="syllabus">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Syllabus Breakdown</h2>
-      <span class="section-sub">CBSE · STATE · ICSE · IGCSE · Others</span>
-      <div class="divider"></div>
-    </div>
-    <div class="chart-grid-3">
-      <div class="card">
-        <p class="card-title">Students by Syllabus</p>
-        <div class="chart-wrap-sm"><canvas id="chartSylPie"></canvas></div>
-      </div>
-      <div class="card">
-        <p class="card-title">Package Revenue by Syllabus</p>
-        <div class="chart-wrap-sm"><canvas id="chartSylRevPie"></canvas></div>
-      </div>
-      <div class="card">
-        <p class="card-title">Avg Package per Student</p>
-        <div id="sylAvgBar"></div>
-      </div>
-      <div class="card chart-full">
-        <p class="card-title">Syllabus Trend by Month</p>
-        <div class="chart-wrap"><canvas id="chartSylTrend"></canvas></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CLASSES -->
-<section id="classes">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Class-wise Analysis</h2>
-      <span class="section-sub">LKG through Class 12 + Others</span>
-      <div class="divider"></div>
     </div>
     <div class="chart-grid">
-      <div class="card">
-        <p class="card-title">Students per Class — Full Year</p>
-        <div class="chart-wrap-lg"><canvas id="chartClassStudents"></canvas></div>
+      <div class="chart-card">
+        <h3>Country Distribution — Admissions</h3>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="countryDonut"></canvas>
+        </div>
       </div>
-      <div class="card">
-        <p class="card-title">Revenue per Class — Full Year</p>
-        <div class="chart-wrap-lg"><canvas id="chartClassRevenue"></canvas></div>
-      </div>
-      <div class="card chart-full">
-        <p class="card-title">Class Heatmap — Students per Month</p>
-        <div id="classHeatmap" style="overflow-x:auto;padding-top:8px;"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SUBDIVISION -->
-<section id="subdivision">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Country Package (Subdivision)</h2>
-      <span class="section-sub">HS · LP · UP · KG · HSS · Others</span>
-      <div class="divider"></div>
-    </div>
-    <div class="chart-grid">
-      <div class="card">
-        <p class="card-title">Students by Subdivision</p>
-        <div class="chart-wrap"><canvas id="chartSubPie"></canvas></div>
-      </div>
-      <div class="card">
-        <p class="card-title">Revenue by Subdivision</p>
-        <div class="chart-wrap"><canvas id="chartSubRevPie"></canvas></div>
-      </div>
-      <div class="card chart-full">
-        <p class="card-title">Subdivision Monthly Trend</p>
-        <div class="chart-wrap"><canvas id="chartSubTrend"></canvas></div>
+      <div class="chart-card">
+        <h3>Package vs Spot Gap by Month</h3>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="gapChart"></canvas>
+        </div>
       </div>
     </div>
   </div>
-</section>
 
-<!-- MONTHLY DETAIL -->
-<section id="monthly">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Monthly Detailed Tables</h2>
-      <span class="section-sub">Select a month to view full breakdown</span>
-      <div class="divider"></div>
+  <!-- COURSE -->
+  <div class="view" id="view-course">
+    <div class="chart-grid full">
+      <div class="chart-card">
+        <h3>Course Performance — Package &amp; Spot</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot pkg"></div>Total Package</div>
+          <div class="legend-item"><div class="legend-dot spot"></div>Total Spot</div>
+        </div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="courseBarChart"></canvas>
+        </div>
+      </div>
     </div>
-    <div class="filter-row" id="detailMonthFilter"></div>
-    <div id="detailTableArea"></div>
+    <div class="section-title">Course Monthly Breakdown</div>
+    <div class="table-wrap">
+      <table id="courseTable">
+        <thead><tr>
+          <th>Month</th><th>Course</th>
+          <th class="num">Admissions</th>
+          <th class="num">Package (₹)</th>
+          <th class="num">Spot (₹)</th>
+        </tr></thead>
+        <tbody id="courseTableBody"></tbody>
+      </table>
+    </div>
   </div>
-</section>
 
-<footer>
-  <strong>Albedo Education</strong> &nbsp;·&nbsp; 2025 Annual Performance Report &nbsp;·&nbsp; Data: Jan–Dec 2025 &nbsp;·&nbsp; 1,816 student records
-</footer>
+  <!-- SOURCE -->
+  <div class="view" id="view-source">
+    <div class="chart-grid full">
+      <div class="chart-card">
+        <h3>Lead Source Performance — Package &amp; Spot</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot pkg"></div>Total Package</div>
+          <div class="legend-item"><div class="legend-dot spot"></div>Total Spot</div>
+        </div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="sourceBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">Source Monthly Breakdown</div>
+    <div class="table-wrap">
+      <table id="sourceTable">
+        <thead><tr>
+          <th>Month</th><th>Source</th>
+          <th class="num">Admissions</th>
+          <th class="num">Package (₹)</th>
+          <th class="num">Spot (₹)</th>
+        </tr></thead>
+        <tbody id="sourceTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COUNTRY -->
+  <div class="view" id="view-country">
+    <div class="chart-grid full">
+      <div class="chart-card">
+        <h3>Country Performance — Package &amp; Spot</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot pkg"></div>Total Package</div>
+          <div class="legend-item"><div class="legend-dot spot"></div>Total Spot</div>
+        </div>
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="countryBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">Country Monthly Breakdown</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Month</th><th>Country</th>
+          <th class="num">Admissions</th>
+          <th class="num">Package (₹)</th>
+          <th class="num">Spot (₹)</th>
+        </tr></thead>
+        <tbody id="countryTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FULL DETAIL TABLE -->
+  <div class="view" id="view-detail">
+    <div class="section-title">Full Monthly Course Summary</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Month</th>
+          <th>Course</th>
+          <th class="num">Admissions</th>
+          <th class="num">Total Package (₹)</th>
+          <th class="num">Total Spot (₹)</th>
+          <th class="num">Pkg−Spot Gap (₹)</th>
+        </tr></thead>
+        <tbody id="detailBody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
 
 <script>
-// ── DATA ──
-const DATA = {
-  monthly_totals: [{"MONTH_NUM":1,"MONTH":"JANUARY","students":137,"total_package":1165144.0,"total_spot":918884.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","students":93,"total_package":957832.0,"total_spot":727004.0},{"MONTH_NUM":3,"MONTH":"MARCH","students":85,"total_package":1216049.0,"total_spot":750353.0},{"MONTH_NUM":4,"MONTH":"APRIL","students":172,"total_package":2649517.0,"total_spot":1750417.0},{"MONTH_NUM":5,"MONTH":"MAY","students":179,"total_package":3195842.0,"total_spot":1873994.0},{"MONTH_NUM":6,"MONTH":"JUNE","students":153,"total_package":2927975.0,"total_spot":1742909.0},{"MONTH_NUM":7,"MONTH":"JULY","students":139,"total_package":2644050.0,"total_spot":1551855.0},{"MONTH_NUM":8,"MONTH":"AUGUST","students":205,"total_package":3254175.0,"total_spot":2209268.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","students":173,"total_package":3157935.0,"total_spot":2186405.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","students":160,"total_package":2911665.0,"total_spot":1923119.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","students":141,"total_package":1809308.0,"total_spot":1185043.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","students":179,"total_package":1947384.0,"total_spot":1597316.0}],
-  monthly_course: [{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"ACADEMICS","students":37,"total_package":420270.0,"total_spot":319957.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"BASIC","students":3,"total_package":16250.0,"total_spot":16250.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"BASICS","students":39,"total_package":319150.0,"total_spot":238103.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"BASICS AND ACADEMICS","students":12,"total_package":141650.0,"total_spot":126800.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"E-SPEAK","students":1,"total_package":9900.0,"total_spot":5000.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"EXAM COACHING","students":1,"total_package":7500.0,"total_spot":4000.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"ONLINE BATCH","students":25,"total_package":168525.0,"total_spot":142275.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"REVISION","students":5,"total_package":56900.0,"total_spot":46000.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"REVISION BATCH","students":5,"total_package":12499.0,"total_spot":12499.0},{"MONTH_NUM":1,"MONTH":"JANUARY","COURSE":"REVISION INDIVIDUAL","students":1,"total_package":12500.0,"total_spot":8000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"ACADEMICS","students":28,"total_package":459587.0,"total_spot":349257.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"BASICS","students":24,"total_package":219500.0,"total_spot":153350.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"BASICS AND ACADEMICS","students":3,"total_package":25250.0,"total_spot":18500.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"DISTANCE EDUCATION","students":1,"total_package":12500.0,"total_spot":12500.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"E-SPEAK","students":3,"total_package":36300.0,"total_spot":32600.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"EXAM COACHING","students":1,"total_package":10000.0,"total_spot":9000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"KG FOUNDATION COURSE","students":1,"total_package":10000.0,"total_spot":6000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"ONLINE BATCH","students":2,"total_package":59998.0,"total_spot":24000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"ONLINE SCHOOLING","students":1,"total_package":54000.0,"total_spot":54000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"REVISION","students":1,"total_package":1650.0,"total_spot":1650.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"REVISION BATCH","students":12,"total_package":22797.0,"total_spot":22797.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","COURSE":"REVISION INDIVIDUAL","students":8,"total_package":46250.0,"total_spot":43350.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"ABACUS","students":3,"total_package":18240.0,"total_spot":18240.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"ACADEMICS","students":20,"total_package":597620.0,"total_spot":373720.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"ADVANCED BASICS","students":1,"total_package":7000.0,"total_spot":4500.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"BASICS","students":35,"total_package":252100.0,"total_spot":221450.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"E-SPEAK","students":1,"total_package":8700.0,"total_spot":8700.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"EXAM COACHING","students":1,"total_package":11600.0,"total_spot":11500.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"ONLINE BATCH","students":13,"total_package":277989.0,"total_spot":89843.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"ONLINE SCHOOLING","students":1,"total_package":38400.0,"total_spot":18000.0},{"MONTH_NUM":3,"MONTH":"MARCH","COURSE":"REVISION INDIVIDUAL","students":2,"total_package":4400.0,"total_spot":4400.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"ACADEMICS","students":29,"total_package":947470.0,"total_spot":580670.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"ALBEDO JUNIOR","students":1,"total_package":46280.0,"total_spot":15500.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"ALBEDO JUNIOR KG","students":1,"total_package":47500.0,"total_spot":14500.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"BASIC +ACADEMICS","students":1,"total_package":50000.0,"total_spot":27000.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"BASIC ENGLISH &ABACUS","students":1,"total_package":22800.0,"total_spot":22800.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"BASICS","students":99,"total_package":781245.0,"total_spot":736875.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"BASICS & ACADEMICS","students":1,"total_package":45600.0,"total_spot":14500.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"BASICS AND ACADEMICS","students":9,"total_package":128775.0,"total_spot":97525.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"E-SPEAK","students":2,"total_package":14000.0,"total_spot":14000.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"KINDERGARTEN JUNIOR","students":2,"total_package":88200.0,"total_spot":43200.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"ONLINE BATCH","students":14,"total_package":261497.0,"total_spot":91497.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"ONLINE SCHOOLING","students":4,"total_package":199350.0,"total_spot":87350.0},{"MONTH_NUM":4,"MONTH":"APRIL","COURSE":"PRE KG  COURSE","students":1,"total_package":16800.0,"total_spot":5000.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"ACADEMICS","students":27,"total_package":960990.0,"total_spot":552974.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"ADVANCED BASICS","students":1,"total_package":9000.0,"total_spot":5000.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"BASICS","students":102,"total_package":833147.0,"total_spot":691395.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"BASICS AND ACADEMICS","students":11,"total_package":364545.0,"total_spot":191600.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"E-SPEAK","students":1,"total_package":12000.0,"total_spot":3500.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"ONLINE BATCH","students":15,"total_package":405000.0,"total_spot":88000.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"ONLINE SCHOOLING","students":8,"total_package":496335.0,"total_spot":292700.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"PRE KG COURSE","students":1,"total_package":16800.0,"total_spot":9500.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"PRR KG COURSE","students":1,"total_package":16800.0,"total_spot":10000.0},{"MONTH_NUM":5,"MONTH":"MAY","COURSE":"SAY EXAM","students":2,"total_package":37525.0,"total_spot":17125.0},{"MONTH_NUM":6,"MONTH":"JUNE","COURSE":"ABACUS","students":1,"total_package":9500.0,"total_spot":9500.0},{"MONTH_NUM":6,"MONTH":"JUNE","COURSE":"ACADEMICS","students":45,"total_package":1390735.0,"total_spot":886884.0},{"MONTH_NUM":6,"MONTH":"JUNE","COURSE":"BASICS","students":59,"total_package":494640.0,"total_spot":380550.0},{"MONTH_NUM":6,"MONTH":"JUNE","COURSE":"BASICS AND ACADEMICS","students":9,"total_package":206650.0,"total_spot":142725.0},{"MONTH_NUM":6,"MONTH":"JUNE","COURSE":"E-SPEAK","students":5,"total_package":47700.0,"total_spot":33200.0},{"MONTH_NUM":6,"MONTH":"JUNE","COURSE":"MADRASA TUTION (SAMASTHA EK)","students":1,"total_package":5000.0,"total_spot":5000.0},{"MONTH_NUM":6,"MONTH":"JUNE","COURSE":"ONLINE BATCH","students":19,"total_package":453000.0,"total_spot":87500.0},{"MONTH_NUM":6,"MONTH":"JUNE","COURSE":"ONLINE SCHOOLING","students":6,"total_package":320750.0,"total_spot":197550.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"ACADEMICS","students":51,"total_package":1566415.0,"total_spot":838110.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"BASIC+ ADVANCED BASICS","students":1,"total_package":18000.0,"total_spot":6000.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"BASICS","students":55,"total_package":461850.0,"total_spot":385710.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"BASICS AND ACADEMICS","students":10,"total_package":230525.0,"total_spot":157275.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"E-SPEAK","students":1,"total_package":17600.0,"total_spot":10000.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"ONLINE BATCH","students":10,"total_package":250200.0,"total_spot":55300.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"ONLINE SCHOOLING","students":1,"total_package":60760.0,"total_spot":60760.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"REVISION BATCH","students":1,"total_package":2700.0,"total_spot":2700.0},{"MONTH_NUM":7,"MONTH":"JULY","COURSE":"REVISION INDIVIDUAL","students":1,"total_package":36000.0,"total_spot":36000.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"ACADEMICS","students":62,"total_package":1311045.0,"total_spot":893780.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"BASIC+ ADVANCED BASICS","students":1,"total_package":2790.0,"total_spot":2790.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"BASICS","students":87,"total_package":713840.0,"total_spot":571238.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"BASICS AND ACADEMICS","students":28,"total_package":716920.0,"total_spot":442180.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"BASICS+ ADVANCED BASICS","students":1,"total_package":9300.0,"total_spot":9300.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"DISTANCE EDUCATION","students":1,"total_package":50000.0,"total_spot":35000.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"E-SPEAK","students":3,"total_package":36800.0,"total_spot":30200.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"EXAM COACHING","students":1,"total_package":6200.0,"total_spot":6200.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"EXAM ORIENTED CLASS","students":1,"total_package":6875.0,"total_spot":5000.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"OLYMPIAD COMPETITIVE EXAM","students":1,"total_package":8750.0,"total_spot":5000.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"ONLINE BATCH","students":5,"total_package":88500.0,"total_spot":23500.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"ONLINE SCHOOLING","students":5,"total_package":283105.0,"total_spot":168280.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"REVISION BATCH","students":2,"total_package":5400.0,"total_spot":5400.0},{"MONTH_NUM":8,"MONTH":"AUGUST","COURSE":"REVISION INDIVIDUAL","students":2,"total_package":14650.0,"total_spot":11400.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"ACADEMICS","students":63,"total_package":1256700.0,"total_spot":952930.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"BASICS","students":52,"total_package":460900.0,"total_spot":408350.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"BASICS AND ACADEMICS","students":20,"total_package":711215.0,"total_spot":473300.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"E-SPEAK","students":1,"total_package":11400.0,"total_spot":11400.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"ENGLISH ADVANCED FOUNDATION","students":1,"total_package":3500.0,"total_spot":3500.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"ONLINE BATCH","students":19,"total_package":297000.0,"total_spot":87000.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"ONLINE SCHOOLING","students":6,"total_package":361975.0,"total_spot":205040.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"REVISION","students":1,"total_package":19600.0,"total_spot":13800.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","COURSE":"REVISION INDIVIDUAL","students":4,"total_package":24245.0,"total_spot":24245.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"ABACUS","students":2,"total_package":18500.0,"total_spot":18500.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"ACADEMICS","students":61,"total_package":1397140.0,"total_spot":1011659.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"ADVANCED BASIC","students":1,"total_package":9000.0,"total_spot":3000.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"ADVANCED FOUNDATION","students":1,"total_package":11200.0,"total_spot":6500.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"BASIC+ACADEMIC","students":2,"total_package":56500.0,"total_spot":56500.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"BASICS","students":52,"total_package":496125.0,"total_spot":363515.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"BASICS AND ACADEMICS","students":18,"total_package":461365.0,"total_spot":283600.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"ONLINE BATCH","students":10,"total_package":126500.0,"total_spot":36500.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"ONLINE SCHOOLING","students":5,"total_package":269635.0,"total_spot":115145.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"PLAY SCHOOL","students":1,"total_package":17900.0,"total_spot":6900.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","COURSE":"PRE KG","students":2,"total_package":47800.0,"total_spot":21300.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"ABACUS","students":1,"total_package":10500.0,"total_spot":5250.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"ACADEMICS","students":50,"total_package":835125.0,"total_spot":558865.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"BASICS","students":51,"total_package":467075.0,"total_spot":362610.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"BASICS & ONLINE SCHOOLING","students":1,"total_package":54000.0,"total_spot":9500.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"BASICS AND ACADEMICS","students":10,"total_package":197610.0,"total_spot":132000.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"E-SPEAK","students":3,"total_package":28550.0,"total_spot":19550.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"ONLINE BATCH","students":13,"total_package":147000.0,"total_spot":42500.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"PREKG","students":1,"total_package":6000.0,"total_spot":6000.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"PREKG FOUNDATION","students":1,"total_package":15950.0,"total_spot":9370.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","COURSE":"REVISION INDIVIDUAL","students":5,"total_package":47498.0,"total_spot":39398.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"ABACUS","students":1,"total_package":4800.0,"total_spot":4800.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"ACADEMICS","students":57,"total_package":816715.0,"total_spot":667625.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"BASICS","students":57,"total_package":465925.0,"total_spot":417035.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"BASICS AND ACADEMICS","students":20,"total_package":356935.0,"total_spot":268605.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"CRASH COURSE","students":1,"total_package":19800.0,"total_spot":19800.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"E-SPEAK","students":2,"total_package":18900.0,"total_spot":15900.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"EXAM COACHING","students":1,"total_package":5250.0,"total_spot":1750.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"ONLINE BATCH","students":4,"total_package":28500.0,"total_spot":17500.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"ONLINE SCHOOLING","students":1,"total_package":23510.0,"total_spot":19000.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"PREKG","students":1,"total_package":5500.0,"total_spot":5500.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"REVISION BATCH","students":15,"total_package":56999.0,"total_spot":54571.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"REVISION INDIVIDUAL","students":12,"total_package":116890.0,"total_spot":88570.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"RIVISION AND ACADEMIC","students":1,"total_package":16500.0,"total_spot":5500.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","COURSE":"YT003","students":1,"total_package":11160.0,"total_spot":11160.0}],
-  monthly_syllabus: [{"MONTH_NUM":1,"MONTH":"JANUARY","SYLLABUS":"CBSE","students":71,"total_package":717095.0,"total_spot":583732.0},{"MONTH_NUM":1,"MONTH":"JANUARY","SYLLABUS":"ICSE","students":4,"total_package":35100.0,"total_spot":26350.0},{"MONTH_NUM":1,"MONTH":"JANUARY","SYLLABUS":"OTHER","students":2,"total_package":18350.0,"total_spot":18350.0},{"MONTH_NUM":1,"MONTH":"JANUARY","SYLLABUS":"STATE","students":52,"total_package":394599.0,"total_spot":290452.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SYLLABUS":"CBSE","students":46,"total_package":698895.0,"total_spot":521147.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SYLLABUS":"ICSE","students":2,"total_package":13250.0,"total_spot":13250.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SYLLABUS":"IGCSE","students":1,"total_package":6250.0,"total_spot":6250.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SYLLABUS":"NIOS","students":1,"total_package":12500.0,"total_spot":12500.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SYLLABUS":"OTHER","students":2,"total_package":17800.0,"total_spot":14900.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SYLLABUS":"STATE","students":33,"total_package":209137.0,"total_spot":158957.0},{"MONTH_NUM":3,"MONTH":"MARCH","SYLLABUS":"CBSE","students":55,"total_package":974109.0,"total_spot":639259.0},{"MONTH_NUM":3,"MONTH":"MARCH","SYLLABUS":"STATE","students":22,"total_package":241940.0,"total_spot":111094.0},{"MONTH_NUM":4,"MONTH":"APRIL","SYLLABUS":"CBSE","students":115,"total_package":2135952.0,"total_spot":1365002.0},{"MONTH_NUM":4,"MONTH":"APRIL","SYLLABUS":"ICSE","students":2,"total_package":25200.0,"total_spot":20000.0},{"MONTH_NUM":4,"MONTH":"APRIL","SYLLABUS":"OTHERS","students":2,"total_package":30300.0,"total_spot":30300.0},{"MONTH_NUM":4,"MONTH":"APRIL","SYLLABUS":"STATE","students":46,"total_package":458065.0,"total_spot":335115.0},{"MONTH_NUM":5,"MONTH":"MAY","SYLLABUS":"CBSE","students":104,"total_package":2029072.0,"total_spot":1110446.0},{"MONTH_NUM":5,"MONTH":"MAY","SYLLABUS":"ICSE","students":3,"total_package":37750.0,"total_spot":37750.0},{"MONTH_NUM":5,"MONTH":"MAY","SYLLABUS":"OTHERS","students":1,"total_package":104500.0,"total_spot":104500.0},{"MONTH_NUM":5,"MONTH":"MAY","SYLLABUS":"STATE","students":63,"total_package":1024520.0,"total_spot":621298.0},{"MONTH_NUM":6,"MONTH":"JUNE","SYLLABUS":"CBSE","students":98,"total_package":2088950.0,"total_spot":1274573.0},{"MONTH_NUM":6,"MONTH":"JUNE","SYLLABUS":"ICSE","students":2,"total_package":23100.0,"total_spot":19400.0},{"MONTH_NUM":6,"MONTH":"JUNE","SYLLABUS":"IGCSE","students":1,"total_package":8250.0,"total_spot":8250.0},{"MONTH_NUM":6,"MONTH":"JUNE","SYLLABUS":"OTHER","students":1,"total_package":5000.0,"total_spot":5000.0},{"MONTH_NUM":6,"MONTH":"JUNE","SYLLABUS":"OTHERS","students":3,"total_package":48650.0,"total_spot":48150.0},{"MONTH_NUM":6,"MONTH":"JUNE","SYLLABUS":"STATE","students":40,"total_package":754025.0,"total_spot":387536.0},{"MONTH_NUM":7,"MONTH":"JULY","SYLLABUS":"CBSE","students":94,"total_package":2035550.0,"total_spot":1206505.0},{"MONTH_NUM":7,"MONTH":"JULY","SYLLABUS":"ICSE","students":2,"total_package":32650.0,"total_spot":22400.0},{"MONTH_NUM":7,"MONTH":"JULY","SYLLABUS":"IGCSE","students":1,"total_package":36000.0,"total_spot":36000.0},{"MONTH_NUM":7,"MONTH":"JULY","SYLLABUS":"OTHERS","students":2,"total_package":22095.0,"total_spot":22095.0},{"MONTH_NUM":7,"MONTH":"JULY","SYLLABUS":"STATE","students":32,"total_package":517755.0,"total_spot":264855.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SYLLABUS":"CBSE","students":140,"total_package":2423080.0,"total_spot":1657413.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SYLLABUS":"IB","students":1,"total_package":5500.0,"total_spot":5500.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SYLLABUS":"ICSE","students":2,"total_package":38250.0,"total_spot":23500.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SYLLABUS":"IGCSE","students":3,"total_package":65420.0,"total_spot":50220.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SYLLABUS":"NIOS","students":2,"total_package":76150.0,"total_spot":61150.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SYLLABUS":"STATE","students":52,"total_package":645775.0,"total_spot":411485.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SYLLABUS":"CBSE","students":111,"total_package":2194460.0,"total_spot":1610205.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SYLLABUS":"IB","students":1,"total_package":6400.0,"total_spot":6400.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SYLLABUS":"ICSE","students":1,"total_package":13500.0,"total_spot":13500.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SYLLABUS":"OTHERS","students":1,"total_package":11400.0,"total_spot":6840.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SYLLABUS":"STATE","students":54,"total_package":932175.0,"total_spot":549460.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SYLLABUS":"CBSE","students":115,"total_package":2260930.0,"total_spot":1494284.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SYLLABUS":"ICSE","students":2,"total_package":34600.0,"total_spot":23600.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SYLLABUS":"IGCSE","students":3,"total_package":87560.0,"total_spot":87560.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SYLLABUS":"OTHER","students":2,"total_package":27400.0,"total_spot":16400.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SYLLABUS":"OTHERS","students":1,"total_package":10500.0,"total_spot":5000.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SYLLABUS":"STATE","students":32,"total_package":490675.0,"total_spot":296275.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SYLLABUS":"CBSE","students":96,"total_package":1272885.0,"total_spot":897285.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SYLLABUS":"ICSE","students":1,"total_package":6400.0,"total_spot":6400.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SYLLABUS":"IGCSE","students":1,"total_package":5648.0,"total_spot":5648.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SYLLABUS":"OTHERS","students":1,"total_package":16800.0,"total_spot":4500.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SYLLABUS":"STATE","students":37,"total_package":507575.0,"total_spot":271210.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SYLLABUS":"CBSE","students":130,"total_package":1507499.0,"total_spot":1254029.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SYLLABUS":"IGCSE","students":1,"total_package":56800.0,"total_spot":56800.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SYLLABUS":"NIOS","students":1,"total_package":50500.0,"total_spot":25500.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SYLLABUS":"OTHERS","students":1,"total_package":11400.0,"total_spot":11400.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SYLLABUS":"STATE","students":41,"total_package":321185.0,"total_spot":249587.0}],
-  monthly_class: [{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"1","students":7,"total_package":43050.0,"total_spot":37250.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"10","students":23,"total_package":186325.0,"total_spot":151675.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"11","students":4,"total_package":57140.0,"total_spot":43640.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"12","students":4,"total_package":67475.0,"total_spot":46362.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"2","students":6,"total_package":72400.0,"total_spot":67500.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"3","students":8,"total_package":61650.0,"total_spot":49650.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"4","students":10,"total_package":96750.0,"total_spot":70500.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"5","students":5,"total_package":26880.0,"total_spot":22083.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"6","students":4,"total_package":37450.0,"total_spot":30800.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"7","students":7,"total_package":52925.0,"total_spot":42975.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"8","students":19,"total_package":168649.0,"total_spot":143199.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"9","students":16,"total_package":116450.0,"total_spot":96250.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"LKG","students":9,"total_package":124250.0,"total_spot":75000.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"OTHER","students":1,"total_package":10000.0,"total_spot":3750.0},{"MONTH_NUM":1,"MONTH":"JANUARY","CLASS":"UKG","students":6,"total_package":43750.0,"total_spot":38250.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"1","students":8,"total_package":132850.0,"total_spot":107650.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"10","students":12,"total_package":247496.0,"total_spot":189746.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"11","students":3,"total_package":31440.0,"total_spot":31440.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"12","students":2,"total_package":35000.0,"total_spot":26000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"2","students":6,"total_package":40000.0,"total_spot":36500.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"3","students":3,"total_package":27250.0,"total_spot":18250.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"4","students":9,"total_package":54300.0,"total_spot":44650.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"5","students":5,"total_package":36750.0,"total_spot":31350.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"6","students":4,"total_package":27750.0,"total_spot":27750.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"7","students":6,"total_package":50750.0,"total_spot":34870.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"8","students":7,"total_package":30950.0,"total_spot":30950.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"9","students":12,"total_package":152946.0,"total_spot":85248.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"LKG","students":4,"total_package":35750.0,"total_spot":20500.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"OTHER","students":1,"total_package":12000.0,"total_spot":12000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"UG","students":1,"total_package":12600.0,"total_spot":12600.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","CLASS":"UKG","students":2,"total_package":30000.0,"total_spot":17500.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"1","students":12,"total_package":64250.0,"total_spot":60450.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"10","students":16,"total_package":442249.0,"total_spot":208698.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"11","students":1,"total_package":1900.0,"total_spot":1900.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"2","students":4,"total_package":35000.0,"total_spot":32500.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"3","students":3,"total_package":15640.0,"total_spot":15640.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"4","students":13,"total_package":165050.0,"total_spot":114800.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"5","students":6,"total_package":71300.0,"total_spot":40500.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"6","students":4,"total_package":28000.0,"total_spot":22000.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"7","students":1,"total_package":7000.0,"total_spot":4500.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"8","students":2,"total_package":117900.0,"total_spot":69000.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"9","students":6,"total_package":145610.0,"total_spot":88615.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"LKG","students":6,"total_package":53750.0,"total_spot":53750.0},{"MONTH_NUM":3,"MONTH":"MARCH","CLASS":"UKG","students":3,"total_package":68400.0,"total_spot":38000.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"1","students":15,"total_package":93200.0,"total_spot":91200.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"10","students":21,"total_package":443670.0,"total_spot":265620.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"11","students":2,"total_package":52250.0,"total_spot":31750.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"12","students":2,"total_package":82000.0,"total_spot":70000.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"2","students":18,"total_package":281800.0,"total_spot":193300.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"3","students":15,"total_package":138625.0,"total_spot":137625.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"4","students":15,"total_package":242900.0,"total_spot":165300.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"5","students":9,"total_package":122450.0,"total_spot":74100.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"6","students":11,"total_package":99200.0,"total_spot":78300.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"7","students":11,"total_package":253895.0,"total_spot":139175.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"8","students":15,"total_package":190400.0,"total_spot":118900.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"9","students":10,"total_package":148097.0,"total_spot":113297.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"LKG","students":12,"total_package":382680.0,"total_spot":188300.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"OTHER","students":1,"total_package":16800.0,"total_spot":5000.0},{"MONTH_NUM":4,"MONTH":"APRIL","CLASS":"UKG","students":8,"total_package":101550.0,"total_spot":78550.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"1","students":8,"total_package":223400.0,"total_spot":217400.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"10","students":22,"total_package":600285.0,"total_spot":255070.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"12","students":7,"total_package":277025.0,"total_spot":192625.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"2","students":10,"total_package":69105.0,"total_spot":69105.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"3","students":14,"total_package":235107.0,"total_spot":158272.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"4","students":15,"total_package":172900.0,"total_spot":90100.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"5","students":18,"total_package":194620.0,"total_spot":194620.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"6","students":15,"total_package":255375.0,"total_spot":144850.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"7","students":15,"total_package":248500.0,"total_spot":121978.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"8","students":12,"total_package":270050.0,"total_spot":87250.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"9","students":15,"total_package":279175.0,"total_spot":131624.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"LKG","students":10,"total_package":132100.0,"total_spot":95000.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"OTHER","students":2,"total_package":33600.0,"total_spot":19500.0},{"MONTH_NUM":5,"MONTH":"MAY","CLASS":"UKG","students":8,"total_package":204600.0,"total_spot":96600.0}],
-  monthly_subdivision: [{"MONTH_NUM":1,"MONTH":"JANUARY","SUBDIVISION":"HS","students":59,"total_package":513174.0,"total_spot":421624.0},{"MONTH_NUM":1,"MONTH":"JANUARY","SUBDIVISION":"HSS","students":8,"total_package":109115.0,"total_spot":74502.0},{"MONTH_NUM":1,"MONTH":"JANUARY","SUBDIVISION":"KG","students":15,"total_package":168000.0,"total_spot":113250.0},{"MONTH_NUM":1,"MONTH":"JANUARY","SUBDIVISION":"LP","students":30,"total_package":247600.0,"total_spot":209900.0},{"MONTH_NUM":1,"MONTH":"JANUARY","SUBDIVISION":"OTHER","students":1,"total_package":10000.0,"total_spot":3750.0},{"MONTH_NUM":1,"MONTH":"JANUARY","SUBDIVISION":"UP","students":16,"total_package":117255.0,"total_spot":95858.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SUBDIVISION":"HS","students":31,"total_package":431392.0,"total_spot":305944.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SUBDIVISION":"HSS","students":5,"total_package":66440.0,"total_spot":57440.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SUBDIVISION":"KG","students":6,"total_package":65750.0,"total_spot":38000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SUBDIVISION":"LP","students":26,"total_package":254400.0,"total_spot":207050.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SUBDIVISION":"OTHER","students":1,"total_package":12000.0,"total_spot":12000.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SUBDIVISION":"UG","students":1,"total_package":12600.0,"total_spot":12600.0},{"MONTH_NUM":2,"MONTH":"FEBRUARY","SUBDIVISION":"UP","students":15,"total_package":115250.0,"total_spot":93970.0},{"MONTH_NUM":3,"MONTH":"MARCH","SUBDIVISION":"HS","students":24,"total_package":705759.0,"total_spot":366313.0},{"MONTH_NUM":3,"MONTH":"MARCH","SUBDIVISION":"HSS","students":1,"total_package":1900.0,"total_spot":1900.0},{"MONTH_NUM":3,"MONTH":"MARCH","SUBDIVISION":"KG","students":9,"total_package":122150.0,"total_spot":91750.0},{"MONTH_NUM":3,"MONTH":"MARCH","SUBDIVISION":"LP","students":32,"total_package":279940.0,"total_spot":223390.0},{"MONTH_NUM":3,"MONTH":"MARCH","SUBDIVISION":"UP","students":11,"total_package":106300.0,"total_spot":67000.0},{"MONTH_NUM":4,"MONTH":"APRIL","SUBDIVISION":"HS","students":47,"total_package":797117.0,"total_spot":512767.0},{"MONTH_NUM":4,"MONTH":"APRIL","SUBDIVISION":"HSS","students":4,"total_package":134250.0,"total_spot":101750.0},{"MONTH_NUM":4,"MONTH":"APRIL","SUBDIVISION":"KG","students":20,"total_package":484230.0,"total_spot":266850.0},{"MONTH_NUM":4,"MONTH":"APRIL","SUBDIVISION":"LP","students":62,"total_package":698525.0,"total_spot":564675.0},{"MONTH_NUM":4,"MONTH":"APRIL","SUBDIVISION":"OTHER","students":1,"total_package":16800.0,"total_spot":5000.0},{"MONTH_NUM":4,"MONTH":"APRIL","SUBDIVISION":"UP","students":31,"total_package":518595.0,"total_spot":299375.0},{"MONTH_NUM":5,"MONTH":"MAY","SUBDIVISION":"HS","students":49,"total_package":1149510.0,"total_spot":473944.0},{"MONTH_NUM":5,"MONTH":"MAY","SUBDIVISION":"HSS","students":7,"total_package":277025.0,"total_spot":192625.0},{"MONTH_NUM":5,"MONTH":"MAY","SUBDIVISION":"KG","students":18,"total_package":336700.0,"total_spot":191600.0},{"MONTH_NUM":5,"MONTH":"MAY","SUBDIVISION":"LP","students":48,"total_package":705712.0,"total_spot":540077.0},{"MONTH_NUM":5,"MONTH":"MAY","SUBDIVISION":"OTHER","students":2,"total_package":33600.0,"total_spot":19500.0},{"MONTH_NUM":5,"MONTH":"MAY","SUBDIVISION":"UP","students":47,"total_package":693295.0,"total_spot":456248.0},{"MONTH_NUM":6,"MONTH":"JUNE","SUBDIVISION":"HS","students":46,"total_package":1178765.0,"total_spot":502975.0},{"MONTH_NUM":6,"MONTH":"JUNE","SUBDIVISION":"HSS","students":9,"total_package":314160.0,"total_spot":234436.0},{"MONTH_NUM":6,"MONTH":"JUNE","SUBDIVISION":"KG","students":8,"total_package":148875.0,"total_spot":119525.0},{"MONTH_NUM":6,"MONTH":"JUNE","SUBDIVISION":"LP","students":49,"total_package":747725.0,"total_spot":536573.0},{"MONTH_NUM":6,"MONTH":"JUNE","SUBDIVISION":"OTHER","students":2,"total_package":12500.0,"total_spot":12000.0},{"MONTH_NUM":6,"MONTH":"JUNE","SUBDIVISION":"UP","students":31,"total_package":525950.0,"total_spot":337400.0},{"MONTH_NUM":7,"MONTH":"JULY","SUBDIVISION":"HS","students":36,"total_package":1038830.0,"total_spot":490610.0},{"MONTH_NUM":7,"MONTH":"JULY","SUBDIVISION":"HSS","students":8,"total_package":274750.0,"total_spot":161325.0},{"MONTH_NUM":7,"MONTH":"JULY","SUBDIVISION":"KG","students":6,"total_package":49800.0,"total_spot":40500.0},{"MONTH_NUM":7,"MONTH":"JULY","SUBDIVISION":"LP","students":49,"total_package":664255.0,"total_spot":486680.0},{"MONTH_NUM":7,"MONTH":"JULY","SUBDIVISION":"OTHER","students":1,"total_package":6750.0,"total_spot":6750.0},{"MONTH_NUM":7,"MONTH":"JULY","SUBDIVISION":"UP","students":31,"total_package":609665.0,"total_spot":365990.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SUBDIVISION":"HS","students":44,"total_package":971850.0,"total_spot":571700.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SUBDIVISION":"HSS","students":3,"total_package":51790.0,"total_spot":40150.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SUBDIVISION":"KG","students":17,"total_package":309925.0,"total_spot":241625.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SUBDIVISION":"LP","students":81,"total_package":1090250.0,"total_spot":759957.0},{"MONTH_NUM":8,"MONTH":"AUGUST","SUBDIVISION":"UP","students":55,"total_package":830360.0,"total_spot":595836.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SUBDIVISION":"HS","students":59,"total_package":1129625.0,"total_spot":643985.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SUBDIVISION":"HSS","students":7,"total_package":198500.0,"total_spot":134500.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SUBDIVISION":"KG","students":17,"total_package":332495.0,"total_spot":252795.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SUBDIVISION":"LP","students":36,"total_package":643240.0,"total_spot":478415.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SUBDIVISION":"OTHER","students":2,"total_package":30900.0,"total_spot":20500.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SUBDIVISION":"UG","students":1,"total_package":11400.0,"total_spot":6840.0},{"MONTH_NUM":9,"MONTH":"SEPTEMBER","SUBDIVISION":"UP","students":46,"total_package":811775.0,"total_spot":649370.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SUBDIVISION":"HS","students":45,"total_package":1015640.0,"total_spot":660719.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SUBDIVISION":"HSS","students":1,"total_package":7200.0,"total_spot":7200.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SUBDIVISION":"KG","students":13,"total_package":258050.0,"total_spot":155640.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SUBDIVISION":"LP","students":58,"total_package":955395.0,"total_spot":685180.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SUBDIVISION":"OTHER","students":3,"total_package":52000.0,"total_spot":21400.0},{"MONTH_NUM":10,"MONTH":"OCTOBER","SUBDIVISION":"UP","students":35,"total_package":623380.0,"total_spot":392980.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SUBDIVISION":"HS","students":41,"total_package":639743.0,"total_spot":359258.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SUBDIVISION":"HSS","students":7,"total_package":180850.0,"total_spot":105860.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SUBDIVISION":"KG","students":10,"total_package":138850.0,"total_spot":84270.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SUBDIVISION":"LP","students":43,"total_package":405415.0,"total_spot":302405.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SUBDIVISION":"OTHER","students":2,"total_package":14700.0,"total_spot":14700.0},{"MONTH_NUM":11,"MONTH":"NOVEMBER","SUBDIVISION":"UP","students":33,"total_package":429750.0,"total_spot":318550.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SUBDIVISION":"HS","students":56,"total_package":621639.0,"total_spot":516451.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SUBDIVISION":"HSS","students":7,"total_package":139720.0,"total_spot":98070.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SUBDIVISION":"KG","students":16,"total_package":187760.0,"total_spot":146600.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SUBDIVISION":"LP","students":64,"total_package":655680.0,"total_spot":558470.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SUBDIVISION":"OTHER","students":2,"total_package":16900.0,"total_spot":16900.0},{"MONTH_NUM":12,"MONTH":"DECEMBER","SUBDIVISION":"UP","students":29,"total_package":325685.0,"total_spot":260825.0}],
-  monthly_source: [{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"AYESHAS KITCHEN","students":4,"total_package":29150.0,"total_spot":18500.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"CAMPAIGN  - 001","students":8,"total_package":53050.0,"total_spot":35250.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"Campaign 003","students":1,"total_package":9900.0,"total_spot":9900.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"FACE BOOK","students":2,"total_package":10000.0,"total_spot":5500.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"INSTA CAMPAIGN","students":5,"total_package":29350.0,"total_spot":22850.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"INSTAGRAM","students":8,"total_package":104350.0,"total_spot":89153.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"IRFANA","students":17,"total_package":147575.0,"total_spot":112175.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"Other","students":1,"total_package":13900.0,"total_spot":13900.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"Re package","students":3,"total_package":22250.0,"total_spot":22250.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"Reference","students":6,"total_package":76525.0,"total_spot":44625.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"SHAMIS OWN","students":5,"total_package":95500.0,"total_spot":59000.0},{"MONTH_NUM":1,"MONTH":"JANUARY","LEAD_SOURCE":"YOUTUBE","students":69,"total_package":573594.0,"total_spot":485781.0}]
-};
+// ── DATA ──────────────────────────────────────────────────────────────────
+const DATA = {"course_monthly": [{"MONTH": "JANUARY", "COURSE": "ACADEMICS", "Admissions": 37, "Total_Package": 436270.0, "Total_Spot": 335957.0}, {"MONTH": "JANUARY", "COURSE": "BASICS", "Admissions": 42, "Total_Package": 355900.0, "Total_Spot": 274853.0}, {"MONTH": "JANUARY", "COURSE": "BASICS & ACADEMICS", "Admissions": 12, "Total_Package": 147150.0, "Total_Spot": 132300.0}, {"MONTH": "JANUARY", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 10400.0, "Total_Spot": 5500.0}, {"MONTH": "JANUARY", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 8000.0, "Total_Spot": 4500.0}, {"MONTH": "JANUARY", "COURSE": "ONLINE BATCH", "Admissions": 25, "Total_Package": 168525.0, "Total_Spot": 142275.0}, {"MONTH": "JANUARY", "COURSE": "REVISION BATCH", "Admissions": 5, "Total_Package": 12499.0, "Total_Spot": 12499.0}, {"MONTH": "JANUARY", "COURSE": "REVISION INDIVIDUAL", "Admissions": 6, "Total_Package": 72400.0, "Total_Spot": 57000.0}, {"MONTH": "FEBRUARY", "COURSE": "ACADEMICS", "Admissions": 28, "Total_Package": 471087.0, "Total_Spot": 360757.0}, {"MONTH": "FEBRUARY", "COURSE": "BASICS", "Admissions": 24, "Total_Package": 231500.0, "Total_Spot": 165350.0}, {"MONTH": "FEBRUARY", "COURSE": "BASICS & ACADEMICS", "Admissions": 3, "Total_Package": 26750.0, "Total_Spot": 20000.0}, {"MONTH": "FEBRUARY", "COURSE": "DISTANCE EDUCATION", "Admissions": 1, "Total_Package": 12500.0, "Total_Spot": 12500.0}, {"MONTH": "FEBRUARY", "COURSE": "E-SPEAK", "Admissions": 3, "Total_Package": 37800.0, "Total_Spot": 34100.0}, {"MONTH": "FEBRUARY", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 10500.0, "Total_Spot": 9500.0}, {"MONTH": "FEBRUARY", "COURSE": "KG FOUNDATION COURSE", "Admissions": 1, "Total_Package": 10500.0, "Total_Spot": 6500.0}, {"MONTH": "FEBRUARY", "COURSE": "ONLINE BATCH", "Admissions": 2, "Total_Package": 59998.0, "Total_Spot": 24000.0}, {"MONTH": "FEBRUARY", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 54500.0, "Total_Spot": 54500.0}, {"MONTH": "FEBRUARY", "COURSE": "REVISION BATCH", "Admissions": 12, "Total_Package": 22797.0, "Total_Spot": 22797.0}, {"MONTH": "FEBRUARY", "COURSE": "REVISION INDIVIDUAL", "Admissions": 9, "Total_Package": 51900.0, "Total_Spot": 49000.0}, {"MONTH": "MARCH", "COURSE": "ABACUS", "Admissions": 3, "Total_Package": 19740.0, "Total_Spot": 19740.0}, {"MONTH": "MARCH", "COURSE": "ACADEMICS", "Admissions": 20, "Total_Package": 606120.0, "Total_Spot": 382220.0}, {"MONTH": "MARCH", "COURSE": "ADVANCED BASICS", "Admissions": 1, "Total_Package": 7500.0, "Total_Spot": 5000.0}, {"MONTH": "MARCH", "COURSE": "BASICS", "Admissions": 35, "Total_Package": 269600.0, "Total_Spot": 238950.0}, {"MONTH": "MARCH", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 9200.0, "Total_Spot": 9200.0}, {"MONTH": "MARCH", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 12100.0, "Total_Spot": 12000.0}, {"MONTH": "MARCH", "COURSE": "ONLINE BATCH", "Admissions": 13, "Total_Package": 278489.0, "Total_Spot": 90343.0}, {"MONTH": "MARCH", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 38900.0, "Total_Spot": 18500.0}, {"MONTH": "MARCH", "COURSE": "REVISION INDIVIDUAL", "Admissions": 2, "Total_Package": 5400.0, "Total_Spot": 5400.0}, {"MONTH": "APRIL", "COURSE": "ACADEMICS", "Admissions": 29, "Total_Package": 959470.0, "Total_Spot": 592670.0}, {"MONTH": "APRIL", "COURSE": "ALBEDO JUNIOR", "Admissions": 1, "Total_Package": 46780.0, "Total_Spot": 16000.0}, {"MONTH": "APRIL", "COURSE": "ALBEDO JUNIOR KG", "Admissions": 1, "Total_Package": 48000.0, "Total_Spot": 15000.0}, {"MONTH": "APRIL", "COURSE": "BASICS", "Admissions": 99, "Total_Package": 829745.0, "Total_Spot": 785375.0}, {"MONTH": "APRIL", "COURSE": "BASICS & ACADEMICS", "Admissions": 11, "Total_Package": 229375.0, "Total_Spot": 144025.0}, {"MONTH": "APRIL", "COURSE": "E-SPEAK", "Admissions": 2, "Total_Package": 15000.0, "Total_Spot": 15000.0}, {"MONTH": "APRIL", "COURSE": "KINDERGARTEN JUNIOR", "Admissions": 2, "Total_Package": 89200.0, "Total_Spot": 44200.0}, {"MONTH": "APRIL", "COURSE": "ONLINE BATCH", "Admissions": 14, "Total_Package": 261997.0, "Total_Spot": 91997.0}, {"MONTH": "APRIL", "COURSE": "ONLINE SCHOOLING", "Admissions": 4, "Total_Package": 200850.0, "Total_Spot": 88850.0}, {"MONTH": "MAY", "COURSE": "ACADEMICS", "Admissions": 27, "Total_Package": 972990.0, "Total_Spot": 564974.0}, {"MONTH": "MAY", "COURSE": "ADVANCED BASICS", "Admissions": 1, "Total_Package": 9500.0, "Total_Spot": 5500.0}, {"MONTH": "MAY", "COURSE": "BASICS", "Admissions": 102, "Total_Package": 882647.0, "Total_Spot": 740895.0}, {"MONTH": "MAY", "COURSE": "BASICS & ACADEMICS", "Admissions": 11, "Total_Package": 369545.0, "Total_Spot": 196600.0}, {"MONTH": "MAY", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 12500.0, "Total_Spot": 4000.0}, {"MONTH": "MAY", "COURSE": "ONLINE BATCH", "Admissions": 15, "Total_Package": 405000.0, "Total_Spot": 88000.0}, {"MONTH": "MAY", "COURSE": "ONLINE SCHOOLING", "Admissions": 8, "Total_Package": 500335.0, "Total_Spot": 296700.0}, {"MONTH": "MAY", "COURSE": "SAY EXAM", "Admissions": 2, "Total_Package": 38025.0, "Total_Spot": 17625.0}, {"MONTH": "JUNE", "COURSE": "ABACUS", "Admissions": 1, "Total_Package": 10000.0, "Total_Spot": 10000.0}, {"MONTH": "JUNE", "COURSE": "ACADEMICS", "Admissions": 45, "Total_Package": 1412235.0, "Total_Spot": 908384.0}, {"MONTH": "JUNE", "COURSE": "BASICS", "Admissions": 59, "Total_Package": 523140.0, "Total_Spot": 409050.0}, {"MONTH": "JUNE", "COURSE": "BASICS & ACADEMICS", "Admissions": 9, "Total_Package": 211150.0, "Total_Spot": 147225.0}, {"MONTH": "JUNE", "COURSE": "E-SPEAK", "Admissions": 5, "Total_Package": 49700.0, "Total_Spot": 35200.0}, {"MONTH": "JUNE", "COURSE": "ONLINE BATCH", "Admissions": 19, "Total_Package": 453500.0, "Total_Spot": 88000.0}, {"MONTH": "JUNE", "COURSE": "ONLINE SCHOOLING", "Admissions": 6, "Total_Package": 323250.0, "Total_Spot": 200050.0}, {"MONTH": "JULY", "COURSE": "ACADEMICS", "Admissions": 51, "Total_Package": 1590415.0, "Total_Spot": 862110.0}, {"MONTH": "JULY", "COURSE": "BASICS", "Admissions": 55, "Total_Package": 488850.0, "Total_Spot": 412710.0}, {"MONTH": "JULY", "COURSE": "BASICS & ACADEMICS", "Admissions": 10, "Total_Package": 235525.0, "Total_Spot": 162275.0}, {"MONTH": "JULY", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 18100.0, "Total_Spot": 10500.0}, {"MONTH": "JULY", "COURSE": "ONLINE BATCH", "Admissions": 10, "Total_Package": 250200.0, "Total_Spot": 55300.0}, {"MONTH": "JULY", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 61260.0, "Total_Spot": 61260.0}, {"MONTH": "JULY", "COURSE": "REVISION BATCH", "Admissions": 1, "Total_Package": 2700.0, "Total_Spot": 2700.0}, {"MONTH": "JULY", "COURSE": "REVISION INDIVIDUAL", "Admissions": 1, "Total_Package": 36500.0, "Total_Spot": 36500.0}, {"MONTH": "AUGUST", "COURSE": "ACADEMICS", "Admissions": 62, "Total_Package": 1339545.0, "Total_Spot": 922280.0}, {"MONTH": "AUGUST", "COURSE": "BASICS", "Admissions": 87, "Total_Package": 755840.0, "Total_Spot": 613238.0}, {"MONTH": "AUGUST", "COURSE": "BASICS & ACADEMICS", "Admissions": 28, "Total_Package": 730920.0, "Total_Spot": 456180.0}, {"MONTH": "AUGUST", "COURSE": "DISTANCE EDUCATION", "Admissions": 1, "Total_Package": 50500.0, "Total_Spot": 35500.0}, {"MONTH": "AUGUST", "COURSE": "E-SPEAK", "Admissions": 3, "Total_Package": 38300.0, "Total_Spot": 31700.0}, {"MONTH": "AUGUST", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 6700.0, "Total_Spot": 6700.0}, {"MONTH": "AUGUST", "COURSE": "ONLINE BATCH", "Admissions": 5, "Total_Package": 88500.0, "Total_Spot": 23500.0}, {"MONTH": "AUGUST", "COURSE": "ONLINE SCHOOLING", "Admissions": 5, "Total_Package": 285605.0, "Total_Spot": 170780.0}, {"MONTH": "AUGUST", "COURSE": "REVISION BATCH", "Admissions": 2, "Total_Package": 5400.0, "Total_Spot": 5400.0}, {"MONTH": "AUGUST", "COURSE": "REVISION INDIVIDUAL", "Admissions": 2, "Total_Package": 15650.0, "Total_Spot": 12400.0}, {"MONTH": "SEPTEMBER", "COURSE": "ACADEMICS", "Admissions": 63, "Total_Package": 1284200.0, "Total_Spot": 980430.0}, {"MONTH": "SEPTEMBER", "COURSE": "BASICS", "Admissions": 52, "Total_Package": 486400.0, "Total_Spot": 433850.0}, {"MONTH": "SEPTEMBER", "COURSE": "BASICS & ACADEMICS", "Admissions": 20, "Total_Package": 720715.0, "Total_Spot": 482800.0}, {"MONTH": "SEPTEMBER", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 11900.0, "Total_Spot": 11900.0}, {"MONTH": "SEPTEMBER", "COURSE": "ONLINE BATCH", "Admissions": 19, "Total_Package": 297500.0, "Total_Spot": 87500.0}, {"MONTH": "SEPTEMBER", "COURSE": "ONLINE SCHOOLING", "Admissions": 6, "Total_Package": 364975.0, "Total_Spot": 208040.0}, {"MONTH": "SEPTEMBER", "COURSE": "REVISION INDIVIDUAL", "Admissions": 5, "Total_Package": 46345.0, "Total_Spot": 40545.0}, {"MONTH": "OCTOBER", "COURSE": "ABACUS", "Admissions": 2, "Total_Package": 19500.0, "Total_Spot": 19500.0}, {"MONTH": "OCTOBER", "COURSE": "ACADEMICS", "Admissions": 61, "Total_Package": 1426640.0, "Total_Spot": 1041159.0}, {"MONTH": "OCTOBER", "COURSE": "ADVANCED BASICS", "Admissions": 1, "Total_Package": 9500.0, "Total_Spot": 3500.0}, {"MONTH": "OCTOBER", "COURSE": "BASICS", "Admissions": 52, "Total_Package": 522125.0, "Total_Spot": 389515.0}, {"MONTH": "OCTOBER", "COURSE": "BASICS & ACADEMICS", "Admissions": 20, "Total_Package": 527865.0, "Total_Spot": 350100.0}, {"MONTH": "OCTOBER", "COURSE": "ONLINE BATCH", "Admissions": 10, "Total_Package": 126500.0, "Total_Spot": 36500.0}, {"MONTH": "OCTOBER", "COURSE": "ONLINE SCHOOLING", "Admissions": 5, "Total_Package": 272135.0, "Total_Spot": 117645.0}, {"MONTH": "OCTOBER", "COURSE": "PLAY SCHOOL", "Admissions": 1, "Total_Package": 18400.0, "Total_Spot": 7400.0}, {"MONTH": "OCTOBER", "COURSE": "PRE KG", "Admissions": 2, "Total_Package": 48800.0, "Total_Spot": 22300.0}, {"MONTH": "NOVEMBER", "COURSE": "ABACUS", "Admissions": 1, "Total_Package": 11000.0, "Total_Spot": 5750.0}, {"MONTH": "NOVEMBER", "COURSE": "ACADEMICS", "Admissions": 50, "Total_Package": 858625.0, "Total_Spot": 582365.0}, {"MONTH": "NOVEMBER", "COURSE": "BASICS", "Admissions": 51, "Total_Package": 492075.0, "Total_Spot": 387610.0}, {"MONTH": "NOVEMBER", "COURSE": "BASICS & ACADEMICS", "Admissions": 10, "Total_Package": 202610.0, "Total_Spot": 137000.0}, {"MONTH": "NOVEMBER", "COURSE": "E-SPEAK", "Admissions": 3, "Total_Package": 30050.0, "Total_Spot": 21050.0}, {"MONTH": "NOVEMBER", "COURSE": "ONLINE BATCH", "Admissions": 13, "Total_Package": 147000.0, "Total_Spot": 42500.0}, {"MONTH": "NOVEMBER", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 54500.0, "Total_Spot": 10000.0}, {"MONTH": "NOVEMBER", "COURSE": "REVISION INDIVIDUAL", "Admissions": 5, "Total_Package": 49498.0, "Total_Spot": 41398.0}, {"MONTH": "DECEMBER", "COURSE": "ABACUS", "Admissions": 1, "Total_Package": 5300.0, "Total_Spot": 5300.0}, {"MONTH": "DECEMBER", "COURSE": "ACADEMICS", "Admissions": 57, "Total_Package": 844215.0, "Total_Spot": 695125.0}, {"MONTH": "DECEMBER", "COURSE": "BASICS", "Admissions": 57, "Total_Package": 494425.0, "Total_Spot": 445535.0}, {"MONTH": "DECEMBER", "COURSE": "BASICS & ACADEMICS", "Admissions": 20, "Total_Package": 366935.0, "Total_Spot": 278605.0}, {"MONTH": "DECEMBER", "COURSE": "E-SPEAK", "Admissions": 2, "Total_Package": 19900.0, "Total_Spot": 16900.0}, {"MONTH": "DECEMBER", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 5750.0, "Total_Spot": 2250.0}, {"MONTH": "DECEMBER", "COURSE": "ONLINE BATCH", "Admissions": 4, "Total_Package": 28500.0, "Total_Spot": 17500.0}, {"MONTH": "DECEMBER", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 24010.0, "Total_Spot": 19500.0}, {"MONTH": "DECEMBER", "COURSE": "REVISION BATCH", "Admissions": 15, "Total_Package": 56999.0, "Total_Spot": 54571.0}, {"MONTH": "DECEMBER", "COURSE": "REVISION INDIVIDUAL", "Admissions": 12, "Total_Package": 122390.0, "Total_Spot": 94070.0}], "source_monthly": [{"MONTH": "JANUARY", "SOURCE_CAT": "Campaign/NSF", "Admissions": 9, "Total_Package": 67450.0, "Total_Spot": 49650.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 11000.0, "Total_Spot": 6500.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Instagram", "Admissions": 13, "Total_Package": 139700.0, "Total_Spot": 118003.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Other", "Admissions": 6, "Total_Package": 111900.0, "Total_Spot": 75400.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Re-Package", "Admissions": 3, "Total_Package": 22250.0, "Total_Spot": 22250.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Reference", "Admissions": 6, "Total_Package": 79025.0, "Total_Spot": 47125.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "YouTube", "Admissions": 90, "Total_Package": 779819.0, "Total_Spot": 645956.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Campaign/NSF", "Admissions": 15, "Total_Package": 169700.0, "Total_Spot": 139970.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Facebook", "Admissions": 1, "Total_Package": 97850.0, "Total_Spot": 50000.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 3000.0, "Total_Spot": 3000.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Instagram", "Admissions": 9, "Total_Package": 135852.0, "Total_Spot": 121852.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Other", "Admissions": 4, "Total_Package": 27350.0, "Total_Spot": 25100.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Re-Package", "Admissions": 7, "Total_Package": 50399.0, "Total_Spot": 35499.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Reference", "Admissions": 5, "Total_Package": 35499.0, "Total_Spot": 28749.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "YouTube", "Admissions": 43, "Total_Package": 470182.0, "Total_Spot": 354834.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Campaign/NSF", "Admissions": 22, "Total_Package": 206489.0, "Total_Spot": 165689.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 1, "Total_Package": 6750.0, "Total_Spot": 6750.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 11000.0, "Total_Spot": 11000.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 13000.0, "Total_Spot": 8000.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Instagram", "Admissions": 5, "Total_Package": 60200.0, "Total_Spot": 39800.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Other", "Admissions": 1, "Total_Package": 3000.0, "Total_Spot": 3000.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Re-Package", "Admissions": 2, "Total_Package": 39000.0, "Total_Spot": 11999.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Reference", "Admissions": 9, "Total_Package": 173650.0, "Total_Spot": 117300.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 4, "Total_Package": 72000.0, "Total_Spot": 24000.0}, {"MONTH": "MARCH", "SOURCE_CAT": "YouTube", "Admissions": 30, "Total_Package": 661960.0, "Total_Spot": 393815.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Campaign/NSF", "Admissions": 31, "Total_Package": 418000.0, "Total_Spot": 311550.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 10, "Total_Package": 256670.0, "Total_Spot": 176950.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Facebook", "Admissions": 4, "Total_Package": 40300.0, "Total_Spot": 40300.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Google/Website", "Admissions": 3, "Total_Package": 61500.0, "Total_Spot": 38500.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Instagram", "Admissions": 22, "Total_Package": 311930.0, "Total_Spot": 262500.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Other", "Admissions": 6, "Total_Package": 44600.0, "Total_Spot": 42100.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Re-Package", "Admissions": 9, "Total_Package": 246830.0, "Total_Spot": 129780.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Reference", "Admissions": 14, "Total_Package": 246790.0, "Total_Spot": 147190.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 4, "Total_Package": 83300.0, "Total_Spot": 72300.0}, {"MONTH": "APRIL", "SOURCE_CAT": "YouTube", "Admissions": 60, "Total_Package": 970497.0, "Total_Spot": 571947.0}, {"MONTH": "MAY", "SOURCE_CAT": "Campaign/NSF", "Admissions": 35, "Total_Package": 426375.0, "Total_Spot": 281675.0}, {"MONTH": "MAY", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 5, "Total_Package": 61325.0, "Total_Spot": 38925.0}, {"MONTH": "MAY", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 37700.0, "Total_Spot": 37700.0}, {"MONTH": "MAY", "SOURCE_CAT": "Instagram", "Admissions": 19, "Total_Package": 371250.0, "Total_Spot": 182650.0}, {"MONTH": "MAY", "SOURCE_CAT": "Other", "Admissions": 5, "Total_Package": 182115.0, "Total_Spot": 68420.0}, {"MONTH": "MAY", "SOURCE_CAT": "Re-Package", "Admissions": 10, "Total_Package": 270775.0, "Total_Spot": 76655.0}, {"MONTH": "MAY", "SOURCE_CAT": "Reference", "Admissions": 14, "Total_Package": 278945.0, "Total_Spot": 202969.0}, {"MONTH": "MAY", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 2, "Total_Package": 24550.0, "Total_Spot": 14250.0}, {"MONTH": "MAY", "SOURCE_CAT": "YouTube", "Admissions": 75, "Total_Package": 1537507.0, "Total_Spot": 1011050.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Campaign/NSF", "Admissions": 14, "Total_Package": 158525.0, "Total_Spot": 112225.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 2, "Total_Package": 111100.0, "Total_Spot": 82500.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 62500.0, "Total_Spot": 13500.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Instagram", "Admissions": 11, "Total_Package": 213450.0, "Total_Spot": 148223.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Re-Package", "Admissions": 2, "Total_Package": 45100.0, "Total_Spot": 45100.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Reference", "Admissions": 18, "Total_Package": 361475.0, "Total_Spot": 251900.0}, {"MONTH": "JUNE", "SOURCE_CAT": "YouTube", "Admissions": 95, "Total_Package": 2030825.0, "Total_Spot": 1144461.0}, {"MONTH": "JULY", "SOURCE_CAT": "Campaign/NSF", "Admissions": 19, "Total_Package": 227365.0, "Total_Spot": 146065.0}, {"MONTH": "JULY", "SOURCE_CAT": "Facebook", "Admissions": 4, "Total_Package": 93500.0, "Total_Spot": 39625.0}, {"MONTH": "JULY", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 13300.0, "Total_Spot": 6900.0}, {"MONTH": "JULY", "SOURCE_CAT": "Instagram", "Admissions": 22, "Total_Package": 297825.0, "Total_Spot": 219625.0}, {"MONTH": "JULY", "SOURCE_CAT": "Other", "Admissions": 6, "Total_Package": 87890.0, "Total_Spot": 41600.0}, {"MONTH": "JULY", "SOURCE_CAT": "Re-Package", "Admissions": 2, "Total_Package": 23280.0, "Total_Spot": 14640.0}, {"MONTH": "JULY", "SOURCE_CAT": "Reference", "Admissions": 13, "Total_Package": 464135.0, "Total_Spot": 252445.0}, {"MONTH": "JULY", "SOURCE_CAT": "YouTube", "Admissions": 63, "Total_Package": 1476255.0, "Total_Spot": 882455.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Campaign/NSF", "Admissions": 30, "Total_Package": 464530.0, "Total_Spot": 337780.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 2, "Total_Package": 30780.0, "Total_Spot": 10780.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Facebook", "Admissions": 3, "Total_Package": 74000.0, "Total_Spot": 24000.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 41800.0, "Total_Spot": 20650.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Instagram", "Admissions": 17, "Total_Package": 389515.0, "Total_Spot": 259650.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Other", "Admissions": 5, "Total_Package": 48000.0, "Total_Spot": 39250.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Re-Package", "Admissions": 6, "Total_Package": 112600.0, "Total_Spot": 80200.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Reference", "Admissions": 22, "Total_Package": 449985.0, "Total_Spot": 308113.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 1, "Total_Package": 13595.0, "Total_Spot": 13595.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "YouTube", "Admissions": 109, "Total_Package": 1692155.0, "Total_Spot": 1183660.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Campaign/NSF", "Admissions": 29, "Total_Package": 530655.0, "Total_Spot": 395405.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Facebook", "Admissions": 1, "Total_Package": 5980.0, "Total_Spot": 5980.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 40100.0, "Total_Spot": 20300.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Instagram", "Admissions": 16, "Total_Package": 401750.0, "Total_Spot": 290100.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Other", "Admissions": 15, "Total_Package": 223000.0, "Total_Spot": 171545.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Re-Package", "Admissions": 5, "Total_Package": 67250.0, "Total_Spot": 50250.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Reference", "Admissions": 21, "Total_Package": 539775.0, "Total_Spot": 351575.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 3, "Total_Package": 86150.0, "Total_Spot": 70410.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "YouTube", "Admissions": 75, "Total_Package": 1317375.0, "Total_Spot": 889500.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Campaign/NSF", "Admissions": 23, "Total_Package": 401050.0, "Total_Spot": 251550.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 1, "Total_Package": 6100.0, "Total_Spot": 6100.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 16100.0, "Total_Spot": 16100.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 10100.0, "Total_Spot": 10100.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Instagram", "Admissions": 17, "Total_Package": 309125.0, "Total_Spot": 192325.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Other", "Admissions": 4, "Total_Package": 99250.0, "Total_Spot": 57300.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Re-Package", "Admissions": 2, "Total_Package": 15500.0, "Total_Spot": 15500.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Reference", "Admissions": 26, "Total_Package": 615115.0, "Total_Spot": 490550.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 2, "Total_Package": 21500.0, "Total_Spot": 8500.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "YouTube", "Admissions": 76, "Total_Package": 1477625.0, "Total_Spot": 939594.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Campaign/NSF", "Admissions": 48, "Total_Package": 581880.0, "Total_Spot": 326990.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Facebook", "Admissions": 1, "Total_Package": 5900.0, "Total_Spot": 5900.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Google/Website", "Admissions": 3, "Total_Package": 22800.0, "Total_Spot": 15300.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Instagram", "Admissions": 12, "Total_Package": 147048.0, "Total_Spot": 118248.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Other", "Admissions": 2, "Total_Package": 46200.0, "Total_Spot": 26600.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Re-Package", "Admissions": 4, "Total_Package": 45500.0, "Total_Spot": 37400.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Reference", "Admissions": 12, "Total_Package": 233825.0, "Total_Spot": 175185.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "YouTube", "Admissions": 52, "Total_Package": 762205.0, "Total_Spot": 522050.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Campaign/NSF", "Admissions": 59, "Total_Package": 634145.0, "Total_Spot": 548785.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 57350.0, "Total_Spot": 32350.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 13400.0, "Total_Spot": 13400.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Instagram", "Admissions": 26, "Total_Package": 289499.0, "Total_Spot": 211629.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Re-Package", "Admissions": 4, "Total_Package": 35250.0, "Total_Spot": 27850.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Reference", "Admissions": 18, "Total_Package": 264960.0, "Total_Spot": 225320.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "YouTube", "Admissions": 60, "Total_Package": 673820.0, "Total_Spot": 570022.0}], "country_monthly": [{"MONTH": "JANUARY", "COUNTRY": "India", "Admissions": 108, "Total_Package": 1015674.0, "Total_Spot": 806527.0}, {"MONTH": "JANUARY", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 33770.0, "Total_Spot": 33770.0}, {"MONTH": "JANUARY", "COUNTRY": "Saudi Arabia", "Admissions": 2, "Total_Package": 14750.0, "Total_Spot": 14250.0}, {"MONTH": "JANUARY", "COUNTRY": "UAE", "Admissions": 11, "Total_Package": 124200.0, "Total_Spot": 94837.0}, {"MONTH": "JANUARY", "COUNTRY": "UK", "Admissions": 5, "Total_Package": 22750.0, "Total_Spot": 15500.0}, {"MONTH": "FEBRUARY", "COUNTRY": "India", "Admissions": 63, "Total_Package": 645037.0, "Total_Spot": 479459.0}, {"MONTH": "FEBRUARY", "COUNTRY": "Kuwait", "Admissions": 3, "Total_Package": 75200.0, "Total_Spot": 47200.0}, {"MONTH": "FEBRUARY", "COUNTRY": "Oman", "Admissions": 1, "Total_Package": 5500.0, "Total_Spot": 5500.0}, {"MONTH": "FEBRUARY", "COUNTRY": "Qatar", "Admissions": 1, "Total_Package": 13250.0, "Total_Spot": 6500.0}, {"MONTH": "FEBRUARY", "COUNTRY": "UAE", "Admissions": 14, "Total_Package": 240445.0, "Total_Spot": 209945.0}, {"MONTH": "FEBRUARY", "COUNTRY": "UK", "Admissions": 3, "Total_Package": 10400.0, "Total_Spot": 10400.0}, {"MONTH": "MARCH", "COUNTRY": "India", "Admissions": 49, "Total_Package": 688359.0, "Total_Spot": 407813.0}, {"MONTH": "MARCH", "COUNTRY": "Oman", "Admissions": 5, "Total_Package": 50820.0, "Total_Spot": 36320.0}, {"MONTH": "MARCH", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 32600.0, "Total_Spot": 32600.0}, {"MONTH": "MARCH", "COUNTRY": "UAE", "Admissions": 16, "Total_Package": 448870.0, "Total_Spot": 278220.0}, {"MONTH": "MARCH", "COUNTRY": "UK", "Admissions": 4, "Total_Package": 26400.0, "Total_Spot": 26400.0}, {"MONTH": "APRIL", "COUNTRY": "India", "Admissions": 138, "Total_Package": 2023517.0, "Total_Spot": 1407367.0}, {"MONTH": "APRIL", "COUNTRY": "Kuwait", "Admissions": 2, "Total_Package": 38700.0, "Total_Spot": 38700.0}, {"MONTH": "APRIL", "COUNTRY": "Oman", "Admissions": 5, "Total_Package": 61550.0, "Total_Spot": 46550.0}, {"MONTH": "APRIL", "COUNTRY": "Qatar", "Admissions": 2, "Total_Package": 12200.0, "Total_Spot": 12200.0}, {"MONTH": "APRIL", "COUNTRY": "Saudi Arabia", "Admissions": 2, "Total_Package": 52050.0, "Total_Spot": 23050.0}, {"MONTH": "APRIL", "COUNTRY": "UAE", "Admissions": 9, "Total_Package": 366100.0, "Total_Spot": 164950.0}, {"MONTH": "APRIL", "COUNTRY": "UK", "Admissions": 5, "Total_Package": 126300.0, "Total_Spot": 100300.0}, {"MONTH": "MAY", "COUNTRY": "India", "Admissions": 140, "Total_Package": 2511397.0, "Total_Spot": 1543315.0}, {"MONTH": "MAY", "COUNTRY": "Kuwait", "Admissions": 1, "Total_Package": 30000.0, "Total_Spot": 6000.0}, {"MONTH": "MAY", "COUNTRY": "Oman", "Admissions": 1, "Total_Package": 50900.0, "Total_Spot": 30000.0}, {"MONTH": "MAY", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 62350.0, "Total_Spot": 47480.0}, {"MONTH": "MAY", "COUNTRY": "Saudi Arabia", "Admissions": 5, "Total_Package": 111725.0, "Total_Spot": 61824.0}, {"MONTH": "MAY", "COUNTRY": "UAE", "Admissions": 12, "Total_Package": 360770.0, "Total_Spot": 193275.0}, {"MONTH": "MAY", "COUNTRY": "UK", "Admissions": 5, "Total_Package": 63400.0, "Total_Spot": 32400.0}, {"MONTH": "JUNE", "COUNTRY": "India", "Admissions": 114, "Total_Package": 2427475.0, "Total_Spot": 1394309.0}, {"MONTH": "JUNE", "COUNTRY": "Kuwait", "Admissions": 2, "Total_Package": 62500.0, "Total_Spot": 31400.0}, {"MONTH": "JUNE", "COUNTRY": "Oman", "Admissions": 7, "Total_Package": 79200.0, "Total_Spot": 73200.0}, {"MONTH": "JUNE", "COUNTRY": "Saudi Arabia", "Admissions": 1, "Total_Package": 17300.0, "Total_Spot": 17300.0}, {"MONTH": "JUNE", "COUNTRY": "UAE", "Admissions": 9, "Total_Package": 169800.0, "Total_Spot": 140700.0}, {"MONTH": "JUNE", "COUNTRY": "UK", "Admissions": 11, "Total_Package": 226700.0, "Total_Spot": 141000.0}, {"MONTH": "JULY", "COUNTRY": "Bahrain", "Admissions": 1, "Total_Package": 28500.0, "Total_Spot": 11000.0}, {"MONTH": "JULY", "COUNTRY": "India", "Admissions": 102, "Total_Package": 1926405.0, "Total_Spot": 1145510.0}, {"MONTH": "JULY", "COUNTRY": "Kuwait", "Admissions": 1, "Total_Package": 15500.0, "Total_Spot": 15500.0}, {"MONTH": "JULY", "COUNTRY": "Oman", "Admissions": 3, "Total_Package": 71375.0, "Total_Spot": 39200.0}, {"MONTH": "JULY", "COUNTRY": "Qatar", "Admissions": 2, "Total_Package": 11600.0, "Total_Spot": 8700.0}, {"MONTH": "JULY", "COUNTRY": "UAE", "Admissions": 15, "Total_Package": 518150.0, "Total_Spot": 312925.0}, {"MONTH": "JULY", "COUNTRY": "UK", "Admissions": 6, "Total_Package": 112020.0, "Total_Spot": 70520.0}, {"MONTH": "AUGUST", "COUNTRY": "Bahrain", "Admissions": 1, "Total_Package": 5700.0, "Total_Spot": 5700.0}, {"MONTH": "AUGUST", "COUNTRY": "India", "Admissions": 163, "Total_Package": 2681265.0, "Total_Spot": 1820845.0}, {"MONTH": "AUGUST", "COUNTRY": "Malaysia", "Admissions": 1, "Total_Package": 23620.0, "Total_Spot": 23620.0}, {"MONTH": "AUGUST", "COUNTRY": "Oman", "Admissions": 3, "Total_Package": 35300.0, "Total_Spot": 35300.0}, {"MONTH": "AUGUST", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 36750.0, "Total_Spot": 22500.0}, {"MONTH": "AUGUST", "COUNTRY": "Saudi Arabia", "Admissions": 1, "Total_Package": 28500.0, "Total_Spot": 17100.0}, {"MONTH": "AUGUST", "COUNTRY": "UAE", "Admissions": 18, "Total_Package": 356555.0, "Total_Spot": 258543.0}, {"MONTH": "AUGUST", "COUNTRY": "UK", "Admissions": 6, "Total_Package": 149270.0, "Total_Spot": 94070.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "India", "Admissions": 134, "Total_Package": 2637355.0, "Total_Spot": 1847935.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "Kuwait", "Admissions": 5, "Total_Package": 103250.0, "Total_Spot": 103250.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "Oman", "Admissions": 1, "Total_Package": 18000.0, "Total_Spot": 10500.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "Qatar", "Admissions": 4, "Total_Package": 48950.0, "Total_Spot": 43100.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "UAE", "Admissions": 12, "Total_Package": 211980.0, "Total_Spot": 148580.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "UK", "Admissions": 10, "Total_Package": 192500.0, "Total_Spot": 91700.0}, {"MONTH": "OCTOBER", "COUNTRY": "Bahrain", "Admissions": 1, "Total_Package": 6100.0, "Total_Spot": 6100.0}, {"MONTH": "OCTOBER", "COUNTRY": "India", "Admissions": 131, "Total_Package": 2419285.0, "Total_Spot": 1597540.0}, {"MONTH": "OCTOBER", "COUNTRY": "Kuwait", "Admissions": 2, "Total_Package": 109700.0, "Total_Spot": 82200.0}, {"MONTH": "OCTOBER", "COUNTRY": "Oman", "Admissions": 2, "Total_Package": 36440.0, "Total_Spot": 19500.0}, {"MONTH": "OCTOBER", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 61500.0, "Total_Spot": 59299.0}, {"MONTH": "OCTOBER", "COUNTRY": "Saudi Arabia", "Admissions": 2, "Total_Package": 18400.0, "Total_Spot": 18400.0}, {"MONTH": "OCTOBER", "COUNTRY": "UAE", "Admissions": 8, "Total_Package": 265240.0, "Total_Spot": 161640.0}, {"MONTH": "OCTOBER", "COUNTRY": "UK", "Admissions": 5, "Total_Package": 54800.0, "Total_Spot": 42940.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Bahrain", "Admissions": 2, "Total_Package": 52600.0, "Total_Spot": 52600.0}, {"MONTH": "NOVEMBER", "COUNTRY": "India", "Admissions": 102, "Total_Package": 1414658.0, "Total_Spot": 925403.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Kuwait", "Admissions": 1, "Total_Package": 7700.0, "Total_Spot": 7700.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Oman", "Admissions": 1, "Total_Package": 6300.0, "Total_Spot": 6300.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 27150.0, "Total_Spot": 18100.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Saudi Arabia", "Admissions": 4, "Total_Package": 54800.0, "Total_Spot": 42220.0}, {"MONTH": "NOVEMBER", "COUNTRY": "UAE", "Admissions": 10, "Total_Package": 158300.0, "Total_Spot": 89500.0}, {"MONTH": "NOVEMBER", "COUNTRY": "UK", "Admissions": 11, "Total_Package": 123850.0, "Total_Spot": 85850.0}, {"MONTH": "DECEMBER", "COUNTRY": "Bahrain", "Admissions": 1, "Total_Package": 8000.0, "Total_Spot": 8000.0}, {"MONTH": "DECEMBER", "COUNTRY": "India", "Admissions": 134, "Total_Package": 1503830.0, "Total_Spot": 1218382.0}, {"MONTH": "DECEMBER", "COUNTRY": "Kuwait", "Admissions": 4, "Total_Package": 59250.0, "Total_Spot": 52050.0}, {"MONTH": "DECEMBER", "COUNTRY": "Oman", "Admissions": 2, "Total_Package": 24600.0, "Total_Spot": 24600.0}, {"MONTH": "DECEMBER", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 37900.0, "Total_Spot": 30500.0}, {"MONTH": "DECEMBER", "COUNTRY": "Saudi Arabia", "Admissions": 2, "Total_Package": 19600.0, "Total_Spot": 19600.0}, {"MONTH": "DECEMBER", "COUNTRY": "UAE", "Admissions": 17, "Total_Package": 234660.0, "Total_Spot": 203140.0}, {"MONTH": "DECEMBER", "COUNTRY": "UK", "Admissions": 7, "Total_Package": 80584.0, "Total_Spot": 73084.0}], "monthly_total": [{"MONTH": "JANUARY", "Admissions": 129, "Total_Package": 1211144.0, "Total_Spot": 964884.0}, {"MONTH": "FEBRUARY", "Admissions": 85, "Total_Package": 989832.0, "Total_Spot": 759004.0}, {"MONTH": "MARCH", "Admissions": 77, "Total_Package": 1247049.0, "Total_Spot": 781353.0}, {"MONTH": "APRIL", "Admissions": 163, "Total_Package": 2680417.0, "Total_Spot": 1793117.0}, {"MONTH": "MAY", "Admissions": 167, "Total_Package": 3190542.0, "Total_Spot": 1914294.0}, {"MONTH": "JUNE", "Admissions": 144, "Total_Package": 2982975.0, "Total_Spot": 1797909.0}, {"MONTH": "JULY", "Admissions": 130, "Total_Package": 2683550.0, "Total_Spot": 1603355.0}, {"MONTH": "AUGUST", "Admissions": 196, "Total_Package": 3316960.0, "Total_Spot": 2277678.0}, {"MONTH": "SEPTEMBER", "Admissions": 166, "Total_Package": 3212035.0, "Total_Spot": 2245065.0}, {"MONTH": "OCTOBER", "Admissions": 154, "Total_Package": 2971465.0, "Total_Spot": 1987619.0}, {"MONTH": "NOVEMBER", "Admissions": 134, "Total_Package": 1845358.0, "Total_Spot": 1227673.0}, {"MONTH": "DECEMBER", "Admissions": 170, "Total_Package": 1968424.0, "Total_Spot": 1629356.0}], "month_order": ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]};
 
-const MONTHS = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const PALETTE = ['#c8a44a','#1a6b6b','#c84b2f','#4a6ba4','#6b4a9b','#4a9b6b','#9b6b4a','#4a9b9b','#9b4a6b','#6b9b4a','#4a4a9b','#9b9b4a'];
+const MONTHS = DATA.month_order;
+const SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-const fmt = v => '₹' + Math.round(v).toLocaleString('en-IN');
-const fmtL = v => v >= 1e6 ? '₹' + (v/1e6).toFixed(2) + 'L' : '₹' + Math.round(v/1000) + 'K';
+let selectedMonth = 'ALL';
+let activeTab = 'overview';
+let charts = {};
 
-function groupBy(arr, key) {
+// ── HELPERS ──────────────────────────────────────────────────────────────
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const fmtL = n => n >= 100000 ? (n/100000).toFixed(1)+'L' : Math.round(n/1000)+'K';
+
+function filterByMonth(arr, key='MONTH') {
+  if (selectedMonth === 'ALL') return arr;
+  return arr.filter(r => r[key] === selectedMonth);
+}
+
+function aggregateBy(arr, groupKey, metrics=['Total_Package','Total_Spot','Admissions']) {
   const map = {};
   arr.forEach(r => {
-    const k = r[key];
-    if (!map[k]) map[k] = { students: 0, total_package: 0, total_spot: 0 };
-    map[k].students += r.students;
-    map[k].total_package += r.total_package;
-    map[k].total_spot += r.total_spot;
+    const k = r[groupKey];
+    if (!map[k]) map[k] = { [groupKey]: k, Total_Package: 0, Total_Spot: 0, Admissions: 0 };
+    metrics.forEach(m => { map[k][m] = (map[k][m]||0) + (r[m]||0); });
   });
-  return map;
+  return Object.values(map);
 }
 
-// ── HEADLINE STATS ──
-const totals = DATA.monthly_totals;
-const totalStudents = totals.reduce((s,r)=>s+r.students,0);
-const totalPkg = totals.reduce((s,r)=>s+r.total_package,0);
-const totalSpot = totals.reduce((s,r)=>s+r.total_spot,0);
-const courseSet = new Set(DATA.monthly_course.map(r=>r.COURSE));
+const COLORS = {
+  pkg: '#f5a623',
+  spot: '#5c9eff',
+  green: '#7de8b0',
+  pink: '#e87de8',
+  palette: ['#f5a623','#5c9eff','#7de8b0','#e87de8','#ff7e7e','#a8d8ea','#f6d365','#c3f584','#fd79a8','#74b9ff']
+};
 
-document.getElementById('hl-students').textContent = totalStudents.toLocaleString();
-document.getElementById('hl-package').textContent = fmtL(totalPkg);
-document.getElementById('hl-spot').textContent = fmtL(totalSpot);
-document.getElementById('hl-courses').textContent = courseSet.size;
-
-// KPI strip
-const kpiData = [
-  { label: 'Total Students', value: totalStudents.toLocaleString(), change: 'Aug peak: 205' },
-  { label: 'Total Package', value: fmtL(totalPkg), change: 'May peak: ₹32L' },
-  { label: 'Total Spot', value: fmtL(totalSpot), change: 'Aug peak: ₹22L' },
-  { label: 'Avg Spot Rate', value: (totalSpot/totalPkg*100).toFixed(1)+'%', change: 'Dec best: 82%' },
-  { label: 'Active Courses', value: courseSet.size, change: '12 months tracked' },
-  { label: 'Avg Pkg / Student', value: fmtL(totalPkg/totalStudents), change: 'per admission' },
-];
-const strip = document.getElementById('kpi-strip');
-kpiData.forEach(k => {
-  strip.innerHTML += `<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div><div class="kpi-change">${k.change}</div></div>`;
-});
-
-// ── CHART DEFAULTS ──
-Chart.defaults.font.family = "'DM Sans', sans-serif";
-Chart.defaults.plugins.legend.labels.boxWidth = 12;
-Chart.defaults.plugins.legend.labels.padding = 16;
-
-const gridOpts = { color: 'rgba(0,0,0,0.06)', drawBorder: false };
-const tickOpts = { color: '#8a8a8a', font: { size: 11 } };
-
-// ── OVERVIEW CHART ──
-new Chart(document.getElementById('chartOverview'), {
-  type: 'bar',
-  data: {
-    labels: MONTH_SHORT,
-    datasets: [
-      { label: 'Package (₹)', data: totals.map(r=>r.total_package), backgroundColor: 'rgba(200,164,74,0.85)', yAxisID: 'y1', order: 2 },
-      { label: 'Spot (₹)', data: totals.map(r=>r.total_spot), backgroundColor: 'rgba(26,107,107,0.75)', yAxisID: 'y1', order: 2 },
-      { label: 'Students', data: totals.map(r=>r.students), type: 'line', borderColor: '#c84b2f', backgroundColor: 'rgba(200,75,47,0.12)', pointRadius: 5, pointBackgroundColor: '#c84b2f', tension: 0.3, yAxisID: 'y2', order: 1 }
-    ]
+const chartDefaults = {
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1f2535',
+      borderColor: 'rgba(255,255,255,0.1)',
+      borderWidth: 1,
+      titleColor: '#e8eaf0',
+      bodyColor: '#7a8099',
+      padding: 10,
+    }
   },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label === 'Students' ? ctx.raw + ' students' : fmtL(ctx.raw) } } },
-    scales: {
-      x: { grid: gridOpts, ticks: tickOpts, stacked: true },
-      y1: { grid: gridOpts, ticks: { ...tickOpts, callback: v => fmtL(v) }, stacked: true, position: 'left' },
-      y2: { grid: { drawOnChartArea: false }, ticks: tickOpts, position: 'right' }
+  scales: {
+    x: {
+      grid: { color: 'rgba(255,255,255,0.05)' },
+      ticks: { color: '#7a8099', font: { size: 11 } }
+    },
+    y: {
+      grid: { color: 'rgba(255,255,255,0.05)' },
+      ticks: { color: '#7a8099', font: { size: 11 }, callback: v => fmtL(v) }
     }
   }
-});
+};
 
-new Chart(document.getElementById('chartPkgSpot'), {
-  type: 'line',
-  data: {
-    labels: MONTH_SHORT,
-    datasets: [
-      { label: 'Package', data: totals.map(r=>r.total_package), borderColor: '#c8a44a', backgroundColor: 'rgba(200,164,74,0.1)', fill: true, tension: 0.35, pointRadius: 4 },
-      { label: 'Spot', data: totals.map(r=>r.total_spot), borderColor: '#1a6b6b', backgroundColor: 'rgba(26,107,107,0.08)', fill: true, tension: 0.35, pointRadius: 4 }
-    ]
-  },
-  options: { responsive:true,maintainAspectRatio:false, plugins:{legend:{position:'top'}},
-    scales:{ x:{grid:gridOpts,ticks:tickOpts}, y:{grid:gridOpts,ticks:{...tickOpts,callback:v=>fmtL(v)}} } }
-});
-
-new Chart(document.getElementById('chartSpotRate'), {
-  type: 'bar',
-  data: {
-    labels: MONTH_SHORT,
-    datasets: [{ label: 'Spot Rate %', data: totals.map(r=>+(r.total_spot/r.total_package*100).toFixed(1)), backgroundColor: totals.map(r=>r.total_spot/r.total_package > 0.7 ? 'rgba(26,107,107,0.8)' : 'rgba(200,164,74,0.7)'), borderRadius: 2 }]
-  },
-  options: { responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false}},
-    scales:{ x:{grid:gridOpts,ticks:tickOpts}, y:{grid:gridOpts,ticks:{...tickOpts,callback:v=>v+'%'},max:100} } }
-});
-
-// ── COURSES ──
-const courseAgg = groupBy(DATA.monthly_course, 'COURSE');
-const coursesSorted = Object.entries(courseAgg).sort((a,b)=>b[1].students-a[1].students);
-const top10Courses = coursesSorted.slice(0,10);
-
-new Chart(document.getElementById('chartCourseStudents'), {
-  type: 'bar', indexAxis: 'y',
-  data: { labels: top10Courses.map(c=>c[0]), datasets: [{ label:'Students', data: top10Courses.map(c=>c[1].students), backgroundColor: PALETTE.slice(0,10), borderRadius:2 }] },
-  options: { responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:gridOpts,ticks:tickOpts},y:{grid:{display:false},ticks:{...tickOpts,font:{size:10}}}}}
-});
-
-const topCoursesByRev = Object.entries(courseAgg).sort((a,b)=>b[1].total_package-a[1].total_package).slice(0,10);
-new Chart(document.getElementById('chartCourseRevenue'), {
-  type: 'bar', indexAxis: 'y',
-  data: { labels: topCoursesByRev.map(c=>c[0]), datasets: [{ label:'Package', data: topCoursesByRev.map(c=>c[1].total_package), backgroundColor: PALETTE.slice(0,10), borderRadius:2 }] },
-  options: { responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtL(ctx.raw)}}},scales:{x:{grid:gridOpts,ticks:{...tickOpts,callback:v=>fmtL(v)}},y:{grid:{display:false},ticks:{...tickOpts,font:{size:10}}}}}
-});
-
-// Monthly Course filter
-let courseChartInst = null;
-let activeCourseMonth = 1;
-function buildCourseMonthFilter() {
-  const f = document.getElementById('courseMonthFilter');
-  MONTHS.forEach((m,i) => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn' + (i===0?' active':'');
-    btn.textContent = MONTH_SHORT[i];
-    btn.onclick = () => { document.querySelectorAll('#courseMonthFilter .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); activeCourseMonth = i+1; renderCourseMonthly(); };
-    f.appendChild(btn);
-  });
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
-function renderCourseMonthly() {
-  const rows = DATA.monthly_course.filter(r=>r.MONTH_NUM===activeCourseMonth);
-  rows.sort((a,b)=>b.students-a.students);
-  if (courseChartInst) courseChartInst.destroy();
-  courseChartInst = new Chart(document.getElementById('chartCourseMonthly'), {
+
+// ── MONTH BAR ──────────────────────────────────────────────────────────
+function buildMonthBar() {
+  const bar = document.getElementById('monthBar');
+  let html = `<button class="month-btn all-months active" onclick="selectMonth('ALL')">All Months</button>`;
+  MONTHS.forEach((m,i) => {
+    html += `<button class="month-btn" id="mb-${m}" onclick="selectMonth('${m}')">${SHORT[i]}</button>`;
+  });
+  bar.innerHTML = html;
+}
+
+function selectMonth(m) {
+  selectedMonth = m;
+  document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+  if (m === 'ALL') {
+    document.querySelector('.all-months').classList.add('active');
+  } else {
+    document.getElementById('mb-' + m).classList.add('active');
+  }
+  renderAll();
+}
+
+// ── TAB SWITCHING ────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+  document.getElementById('view-' + tab).classList.add('active');
+  renderAll();
+}
+
+// ── KPI ──────────────────────────────────────────────────────────────────
+function renderKPI() {
+  const data = filterByMonth(DATA.monthly_total);
+  const totalAdm = data.reduce((s,r) => s+r.Admissions, 0);
+  const totalPkg = data.reduce((s,r) => s+r.Total_Package, 0);
+  const totalSpot = data.reduce((s,r) => s+r.Total_Spot, 0);
+  const gap = totalPkg - totalSpot;
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Total Admissions</div>
+      <div class="kpi-value">${totalAdm.toLocaleString('en-IN')}</div>
+      <div class="kpi-sub">${selectedMonth === 'ALL' ? 'Full Year' : selectedMonth.charAt(0)+selectedMonth.slice(1).toLowerCase()}</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Total Package</div>
+      <div class="kpi-value">₹${fmtL(totalPkg)}</div>
+      <div class="kpi-sub">${Math.round(totalPkg).toLocaleString('en-IN')}</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Total Spot</div>
+      <div class="kpi-value">₹${fmtL(totalSpot)}</div>
+      <div class="kpi-sub">${Math.round(totalSpot).toLocaleString('en-IN')}</div>
+    </div>
+    <div class="kpi pink">
+      <div class="kpi-label">Pkg−Spot Gap</div>
+      <div class="kpi-value">₹${fmtL(gap)}</div>
+      <div class="kpi-sub">Balance outstanding</div>
+    </div>
+  `;
+}
+
+// ── OVERVIEW CHARTS ───────────────────────────────────────────────────────
+function renderOverview() {
+  const mt = DATA.monthly_total;
+
+  // Line+bar combo — always full year on overview
+  destroyChart('overviewChart');
+  const ctx = document.getElementById('overviewChart');
+  charts['overviewChart'] = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: rows.map(r=>r.COURSE),
+      labels: MONTHS.map((_,i)=>SHORT[i]),
       datasets: [
-        { label:'Students', data:rows.map(r=>r.students), backgroundColor:'rgba(200,164,74,0.8)', yAxisID:'y2' },
-        { label:'Package (₹)', data:rows.map(r=>r.total_package), backgroundColor:'rgba(26,107,107,0.7)', yAxisID:'y1' },
-        { label:'Spot (₹)', data:rows.map(r=>r.total_spot), backgroundColor:'rgba(200,75,47,0.6)', yAxisID:'y1' }
+        { label: 'Total Package', data: mt.map(r=>r.Total_Package), backgroundColor: 'rgba(245,166,35,.65)', borderColor: '#f5a623', borderWidth: 1, borderRadius: 4, order: 2 },
+        { label: 'Total Spot', data: mt.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.5)', borderColor: '#5c9eff', borderWidth: 1, borderRadius: 4, order: 2 },
+        { label: 'Admissions', data: mt.map(r=>r.Admissions), type: 'line', yAxisID: 'y2', borderColor: '#7de8b0', backgroundColor: 'rgba(125,232,176,.15)', borderWidth: 2, pointBackgroundColor: '#7de8b0', pointRadius: 4, tension: 0.4, fill: true, order: 1 }
       ]
     },
-    options: { responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Students'?ctx.raw+' students':fmtL(ctx.raw)}}},
-      scales:{x:{grid:gridOpts,ticks:{...tickOpts,font:{size:9},maxRotation:35}},y1:{grid:gridOpts,ticks:{...tickOpts,callback:v=>fmtL(v)},position:'left'},y2:{grid:{drawOnChartArea:false},ticks:tickOpts,position:'right'}} }
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a8099', font:{size:11} } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a8099', callback: v=>fmtL(v) } },
+        y2: { position: 'right', grid: { display: false }, ticks: { color: '#7de8b0', font:{size:11} } }
+      }
+    }
+  });
+
+  // Course donut
+  const cd = aggregateBy(filterByMonth(DATA.course_monthly), 'COURSE');
+  cd.sort((a,b)=>b.Admissions-a.Admissions);
+  destroyChart('courseDonut');
+  charts['courseDonut'] = new Chart(document.getElementById('courseDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: cd.map(r=>r.COURSE),
+      datasets: [{ data: cd.map(r=>r.Admissions), backgroundColor: COLORS.palette, borderColor: '#181c27', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: true, position: 'right', labels: { color: '#7a8099', font:{size:10}, boxWidth:10, padding:6 } },
+        tooltip: { ...chartDefaults.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} admissions` } }
+      }
+    }
+  });
+
+  // Source donut
+  const sd = aggregateBy(filterByMonth(DATA.source_monthly), 'SOURCE_CAT');
+  sd.sort((a,b)=>b.Admissions-a.Admissions);
+  destroyChart('sourceDonut');
+  charts['sourceDonut'] = new Chart(document.getElementById('sourceDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: sd.map(r=>r.SOURCE_CAT),
+      datasets: [{ data: sd.map(r=>r.Admissions), backgroundColor: COLORS.palette, borderColor: '#181c27', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: true, position: 'right', labels: { color: '#7a8099', font:{size:10}, boxWidth:10, padding:6 } },
+        tooltip: { ...chartDefaults.plugins.tooltip }
+      }
+    }
+  });
+
+  // Country donut
+  const co = aggregateBy(filterByMonth(DATA.country_monthly), 'COUNTRY');
+  co.sort((a,b)=>b.Admissions-a.Admissions);
+  destroyChart('countryDonut');
+  charts['countryDonut'] = new Chart(document.getElementById('countryDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: co.map(r=>r.COUNTRY),
+      datasets: [{ data: co.map(r=>r.Admissions), backgroundColor: COLORS.palette, borderColor: '#181c27', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: true, position: 'right', labels: { color: '#7a8099', font:{size:10}, boxWidth:10, padding:6 } },
+        tooltip: { ...chartDefaults.plugins.tooltip }
+      }
+    }
+  });
+
+  // Gap chart
+  destroyChart('gapChart');
+  charts['gapChart'] = new Chart(document.getElementById('gapChart'), {
+    type: 'bar',
+    data: {
+      labels: MONTHS.map((_,i)=>SHORT[i]),
+      datasets: [
+        { label: 'Spot Collected', data: mt.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.7)', borderRadius: 4 },
+        { label: 'Gap (Outstanding)', data: mt.map(r=>r.Total_Package-r.Total_Spot), backgroundColor: 'rgba(232,125,232,.5)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, labels:{ color:'#7a8099',font:{size:10},boxWidth:10 } }, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { stacked: true, grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',font:{size:11}} },
+        y: { stacked: true, grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',callback:v=>fmtL(v)} }
+      }
+    }
   });
 }
-buildCourseMonthFilter();
-renderCourseMonthly();
 
-// Course Table
-const ctw = document.getElementById('courseTableWrap');
-let thtml = '<table><thead><tr><th>#</th><th>Course</th><th>Total Students</th><th>Total Package</th><th>Total Spot</th><th>Spot Rate</th><th>Avg Pkg/Student</th></tr></thead><tbody>';
-coursesSorted.forEach(([name,d],i)=>{
-  const rate = (d.total_spot/d.total_package*100).toFixed(1);
-  const avg = Math.round(d.total_package/d.students);
-  thtml += `<tr><td class="silver">${i+1}</td><td class="bold">${name}</td><td class="num">${d.students}</td><td class="num gold-text">${fmt(d.total_package)}</td><td class="num teal-text">${fmt(d.total_spot)}</td><td class="num"><span class="badge badge-${rate>70?'teal':'gold'}">${rate}%</span></td><td class="num">${fmt(avg)}</td></tr>`;
-});
-thtml += '</tbody></table>';
-ctw.innerHTML = thtml;
+// ── COURSE VIEW ───────────────────────────────────────────────────────────
+function renderCourse() {
+  const data = aggregateBy(filterByMonth(DATA.course_monthly), 'COURSE');
+  data.sort((a,b)=>b.Total_Package-a.Total_Package);
 
-// ── LEAD SOURCES ──
-// Normalize source names (group similar ones)
-function normSource(s) {
-  const u = s.toUpperCase().trim();
-  if (u.includes('YOUTUBE') || u.startsWith('YT') || u.startsWith('YTB') || u === 'YT001' || u === 'YT002' || u === 'YT003') return 'YouTube';
-  if (u.includes('INSTAGRAM') || u.startsWith('IG')) return 'Instagram';
-  if (u.includes('FACEBOOK') || u.includes('FACE BOOK')) return 'Facebook';
-  if (u.includes('REFERENCE') || u.includes('REFERANCE')) return 'Reference';
-  if (u.includes('CAMPAIGN') || u.includes('CAMP')) return 'Campaign';
-  if (u.includes('NSF')) return 'NSF Lead';
-  if (u.includes('IRFANA')) return 'Irfana';
-  if (u.includes('AYESH') || u.includes('KITCHEN')) return "Ayesha's Kitchen";
-  if (u.includes('RE PACKAGE') || u.includes('REPACKAGE') || u === 'RE PAKAGE') return 'Re-package';
-  if (u.includes('SHAMIS')) return "Shami's Own";
-  if (u.includes('GOOGLE')) return 'Google';
-  if (u.includes('UAE')) return 'UAE Enquiry';
-  return s;
-}
-
-const sourceNorm = {};
-DATA.monthly_source.forEach(r => {
-  const norm = normSource(r.LEAD_SOURCE);
-  if (!sourceNorm[norm]) sourceNorm[norm] = { students:0, total_package:0, total_spot:0, months: {} };
-  sourceNorm[norm].students += r.students;
-  sourceNorm[norm].total_package += r.total_package;
-  sourceNorm[norm].total_spot += r.total_spot;
-  if (!sourceNorm[norm].months[r.MONTH_NUM]) sourceNorm[norm].months[r.MONTH_NUM] = 0;
-  sourceNorm[norm].months[r.MONTH_NUM] += r.students;
-});
-
-const sourcesSorted = Object.entries(sourceNorm).sort((a,b)=>b[1].students-a[1].students);
-const top15Src = sourcesSorted.slice(0,15);
-const maxSrcS = top15Src[0][1].students;
-const maxSrcR = Math.max(...top15Src.map(s=>s[1].total_package));
-
-const ssb = document.getElementById('sourceBarStudents');
-ssb.innerHTML = top15Src.map(([name,d])=>`<div class="bar-row"><div class="bar-top"><span class="bar-name">${name}</span><span class="bar-val">${d.students} students</span></div><div class="bar-track"><div class="bar-fill" style="width:${d.students/maxSrcS*100}%"></div></div></div>`).join('');
-
-const srb = document.getElementById('sourceBarRevenue');
-srb.innerHTML = top15Src.map(([name,d])=>`<div class="bar-row"><div class="bar-top"><span class="bar-name">${name}</span><span class="bar-val">${fmtL(d.total_package)}</span></div><div class="bar-track"><div class="bar-fill teal" style="width:${d.total_package/maxSrcR*100}%"></div></div></div>`).join('');
-
-// Source trend top 5
-const top5Src = sourcesSorted.slice(0,5).map(s=>s[0]);
-new Chart(document.getElementById('chartSourceTrend'), {
-  type: 'line',
-  data: {
-    labels: MONTH_SHORT,
-    datasets: top5Src.map((name,i)=>({
-      label: name,
-      data: MONTHS.map((_,mi)=>{ const s=sourceNorm[name]; return s&&s.months[mi+1]||0; }),
-      borderColor: PALETTE[i], backgroundColor: PALETTE[i]+'22', fill:false, tension:0.35, pointRadius:3
-    }))
-  },
-  options: { responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{grid:gridOpts,ticks:tickOpts},y:{grid:gridOpts,ticks:tickOpts}} }
-});
-
-// Source table
-const stw = document.getElementById('sourceTableWrap');
-let sthtml = '<table><thead><tr><th>#</th><th>Source / Campaign</th><th>Students</th><th>Total Package</th><th>Total Spot</th><th>Spot Rate</th></tr></thead><tbody>';
-sourcesSorted.slice(0,20).forEach(([name,d],i)=>{
-  const rate = (d.total_spot/d.total_package*100).toFixed(1);
-  sthtml += `<tr><td class="silver">${i+1}</td><td class="bold">${name}</td><td class="num">${d.students}</td><td class="num gold-text">${fmt(d.total_package)}</td><td class="num teal-text">${fmt(d.total_spot)}</td><td class="num"><span class="badge badge-${rate>70?'teal':'gold'}">${rate}%</span></td></tr>`;
-});
-sthtml += '</tbody></table>';
-stw.innerHTML = sthtml;
-
-// ── SYLLABUS ──
-const sylAgg = groupBy(DATA.monthly_syllabus, 'SYLLABUS');
-// Normalize
-const sylNorm = {};
-Object.entries(sylAgg).forEach(([s,d])=>{
-  const k = s==='OTHERS'?'OTHER':s;
-  if (!sylNorm[k]) sylNorm[k]={students:0,total_package:0,total_spot:0};
-  sylNorm[k].students+=d.students; sylNorm[k].total_package+=d.total_package; sylNorm[k].total_spot+=d.total_spot;
-});
-const sylEntries = Object.entries(sylNorm).sort((a,b)=>b[1].students-a[1].students);
-
-new Chart(document.getElementById('chartSylPie'), {
-  type: 'doughnut',
-  data: { labels: sylEntries.map(s=>s[0]), datasets:[{ data: sylEntries.map(s=>s[1].students), backgroundColor: PALETTE.slice(0,sylEntries.length), borderWidth:2, borderColor:'#fff' }] },
-  options: { responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}}} }
-});
-
-new Chart(document.getElementById('chartSylRevPie'), {
-  type: 'doughnut',
-  data: { labels: sylEntries.map(s=>s[0]), datasets:[{ data: sylEntries.map(s=>s[1].total_package), backgroundColor: PALETTE.slice(0,sylEntries.length), borderWidth:2, borderColor:'#fff' }] },
-  options: { responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}},tooltip:{callbacks:{label:ctx=>fmtL(ctx.raw)}}} }
-});
-
-const sab = document.getElementById('sylAvgBar');
-const maxAvg = Math.max(...sylEntries.map(s=>s[1].total_package/s[1].students));
-sab.innerHTML = sylEntries.map(([name,d])=>{const avg=d.total_package/d.students; return `<div class="bar-row"><div class="bar-top"><span class="bar-name">${name}</span><span class="bar-val">${fmt(avg)}</span></div><div class="bar-track"><div class="bar-fill rust" style="width:${avg/maxAvg*100}%"></div></div></div>`;}).join('');
-
-// Syllabus trend
-const mainSyl = ['CBSE','STATE','OTHER','ICSE','IGCSE'];
-new Chart(document.getElementById('chartSylTrend'), {
-  type: 'bar',
-  data: {
-    labels: MONTH_SHORT,
-    datasets: mainSyl.map((s,i)=>({
-      label: s,
-      data: DATA.monthly_syllabus.filter(r=>r.SYLLABUS===s||r.SYLLABUS==='OTHERS').reduce((acc,r)=>{ acc[r.MONTH_NUM-1]=(acc[r.MONTH_NUM-1]||0)+r.students; return acc; }, Array(12).fill(0)),
-      backgroundColor: PALETTE[i]+'CC', stack:'s'
-    }))
-  },
-  options: { responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{grid:gridOpts,ticks:tickOpts,stacked:true},y:{grid:gridOpts,ticks:tickOpts,stacked:true}} }
-});
-
-// ── CLASSES ──
-const classOrder = ['LKG','UKG','1','2','3','4','5','6','7','8','9','10','11','12','OTHER','UG'];
-const classAgg = groupBy(DATA.monthly_class, 'CLASS');
-const classEntries = classOrder.filter(c=>classAgg[c]).map(c=>[c, classAgg[c]]);
-
-new Chart(document.getElementById('chartClassStudents'), {
-  type: 'bar',
-  data: { labels: classEntries.map(c=>c[0]==='LKG'||c[0]==='UKG'?c[0]:'Cls '+c[0]), datasets:[{ label:'Students', data:classEntries.map(c=>c[1].students), backgroundColor: classEntries.map((_,i)=>PALETTE[i%PALETTE.length]), borderRadius:2 }] },
-  options: { responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:gridOpts,ticks:tickOpts},y:{grid:gridOpts,ticks:tickOpts}} }
-});
-
-new Chart(document.getElementById('chartClassRevenue'), {
-  type: 'bar',
-  data: { labels: classEntries.map(c=>c[0]==='LKG'||c[0]==='UKG'?c[0]:'Cls '+c[0]), datasets:[{ label:'Package', data:classEntries.map(c=>c[1].total_package), backgroundColor: classEntries.map((_,i)=>PALETTE[i%PALETTE.length]), borderRadius:2 }] },
-  options: { responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmtL(ctx.raw)}}},scales:{x:{grid:gridOpts,ticks:tickOpts},y:{grid:gridOpts,ticks:{...tickOpts,callback:v=>fmtL(v)}}} }
-});
-
-// Class heatmap
-function buildClassHeatmap() {
-  const validClasses = classOrder.filter(c=>classAgg[c]&&c!=='UG');
-  // Build per-class-per-month map
-  const hmap = {};
-  DATA.monthly_class.forEach(r=>{
-    if (!hmap[r.CLASS]) hmap[r.CLASS] = Array(12).fill(0);
-    hmap[r.CLASS][r.MONTH_NUM-1] += r.students;
+  destroyChart('courseBarChart');
+  charts['courseBarChart'] = new Chart(document.getElementById('courseBarChart'), {
+    type: 'bar',
+    data: {
+      labels: data.map(r=>r.COURSE),
+      datasets: [
+        { label: 'Package', data: data.map(r=>r.Total_Package), backgroundColor: 'rgba(245,166,35,.7)', borderRadius: 4 },
+        { label: 'Spot', data: data.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.6)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend:{ display:false }, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',callback:v=>fmtL(v)} },
+        y: { grid:{display:false}, ticks:{color:'#e8eaf0',font:{size:12}} }
+      }
+    }
   });
-  let allVals = [];
-  validClasses.forEach(c=>{ if(hmap[c]) allVals = allVals.concat(hmap[c]); });
-  const maxV = Math.max(...allVals);
 
-  const hmDiv = document.getElementById('classHeatmap');
-  let html = '<div class="heatmap">';
-  // Header row
-  html += '<div class="heatmap-row heatmap-header"><div class="heatmap-label"></div>';
-  MONTH_SHORT.forEach(m=>{ html+=`<div class="heatmap-cell">${m}</div>`; });
-  html += '</div>';
-  // Data rows
-  validClasses.forEach(cls=>{
-    const vals = hmap[cls]||Array(12).fill(0);
-    html += `<div class="heatmap-row"><div class="heatmap-label">${cls==='LKG'||cls==='UKG'?cls:'Cls '+cls}</div>`;
-    vals.forEach(v=>{
-      const intensity = v/maxV;
-      const bg = intensity===0 ? '#f0ece6' : `rgba(200,164,74,${0.1+intensity*0.85})`;
-      const tc = intensity > 0.5 ? '#3d2800' : '#5a4a30';
-      html += `<div class="heatmap-cell" style="background:${bg};color:${tc}" title="${v} students">${v>0?v:''}</div>`;
-    });
-    html += '</div>';
+  // Table
+  const filtered = filterByMonth(DATA.course_monthly).sort((a,b)=>{
+    const mi = MONTHS.indexOf(a.MONTH) - MONTHS.indexOf(b.MONTH);
+    return mi !== 0 ? mi : a.COURSE.localeCompare(b.COURSE);
   });
-  html += '</div>';
-  hmDiv.innerHTML = html;
-}
-buildClassHeatmap();
 
-// ── SUBDIVISION ──
-const subAgg = groupBy(DATA.monthly_subdivision, 'SUBDIVISION');
-const subEntries = Object.entries(subAgg).filter(s=>s[0]!=='UG'&&s[0]!=='OTHER'&&s[0]!=='NAN').sort((a,b)=>b[1].students-a[1].students);
+  let html = '';
+  let prevMonth = '';
+  const monthTotals = {};
+  DATA.monthly_total.forEach(r => { monthTotals[r.MONTH] = r; });
 
-new Chart(document.getElementById('chartSubPie'), {
-  type: 'doughnut',
-  data: { labels:subEntries.map(s=>s[0]), datasets:[{data:subEntries.map(s=>s[1].students),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}] },
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}
-});
-new Chart(document.getElementById('chartSubRevPie'), {
-  type: 'doughnut',
-  data: { labels:subEntries.map(s=>s[0]), datasets:[{data:subEntries.map(s=>s[1].total_package),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}] },
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'},tooltip:{callbacks:{label:ctx=>fmtL(ctx.raw)}}}}
-});
-
-const mainSubs = subEntries.slice(0,5).map(s=>s[0]);
-new Chart(document.getElementById('chartSubTrend'), {
-  type: 'line',
-  data: {
-    labels: MONTH_SHORT,
-    datasets: mainSubs.map((sub,i)=>({
-      label: sub,
-      data: DATA.monthly_subdivision.filter(r=>r.SUBDIVISION===sub).map(r=>[r.MONTH_NUM-1,r.students]).reduce((acc,[mi,s])=>{acc[mi]=(acc[mi]||0)+s;return acc;},Array(12).fill(0)),
-      borderColor:PALETTE[i], backgroundColor:PALETTE[i]+'22', fill:false, tension:0.35, pointRadius:3
-    }))
-  },
-  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{grid:gridOpts,ticks:tickOpts},y:{grid:gridOpts,ticks:tickOpts}}}
-});
-
-// ── MONTHLY DETAIL ──
-let activeDetailMonth = 1;
-function buildDetailFilter() {
-  const f = document.getElementById('detailMonthFilter');
-  MONTHS.forEach((m,i)=>{
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn'+(i===0?' active':'');
-    btn.textContent = MONTH_SHORT[i];
-    btn.onclick = ()=>{ document.querySelectorAll('#detailMonthFilter .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); activeDetailMonth=i+1; renderDetailTables(); };
-    f.appendChild(btn);
+  filtered.forEach(r => {
+    if (r.MONTH !== prevMonth && selectedMonth === 'ALL') {
+      const mt = monthTotals[r.MONTH];
+      if (mt) {
+        html += `<tr class="total-row"><td class="month-col" colspan="2">${r.MONTH}</td><td class="num">${mt.Admissions}</td><td class="num pkg-val">${fmt(mt.Total_Package)}</td><td class="num spot-val">${fmt(mt.Total_Spot)}</td></tr>`;
+      }
+      prevMonth = r.MONTH;
+    }
+    html += `<tr>
+      <td class="month-col">${selectedMonth === 'ALL' ? '' : r.MONTH}</td>
+      <td class="course-col">${r.COURSE}</td>
+      <td class="num">${r.Admissions}</td>
+      <td class="num pkg-val">${fmt(r.Total_Package)}</td>
+      <td class="num spot-val">${fmt(r.Total_Spot)}</td>
+    </tr>`;
   });
+  document.getElementById('courseTableBody').innerHTML = html;
 }
-function renderDetailTables() {
-  const mn = activeDetailMonth;
-  const mName = MONTHS[mn-1];
-  const totRow = DATA.monthly_totals.find(r=>r.MONTH_NUM===mn);
 
-  function sectionTable(title, rows, keyCol) {
-    const sorted = [...rows].filter(r=>r.MONTH_NUM===mn).sort((a,b)=>b.students-a.students);
-    if (!sorted.length) return '';
-    let h = `<div class="card" style="margin-bottom:20px"><p class="card-title">${title} — ${mName}</p><div class="table-wrap"><table>`;
-    h += `<thead><tr><th>${keyCol}</th><th>Students</th><th>Total Package</th><th>Total Spot</th><th>Spot Rate</th></tr></thead><tbody>`;
-    sorted.forEach(r=>{
-      const rate=(r.total_spot/r.total_package*100).toFixed(1);
-      const k = r.COURSE||r.LEAD_SOURCE||r.SYLLABUS||r.CLASS||r.SUBDIVISION||'';
-      h += `<tr><td class="bold">${k}</td><td class="num">${r.students}</td><td class="num gold-text">${fmt(r.total_package)}</td><td class="num teal-text">${fmt(r.total_spot)}</td><td class="num"><span class="badge badge-${rate>70?'teal':'gold'}">${rate}%</span></td></tr>`;
-    });
-    h += `</tbody></table></div></div>`;
-    return h;
-  }
+// ── SOURCE VIEW ───────────────────────────────────────────────────────────
+function renderSource() {
+  const data = aggregateBy(filterByMonth(DATA.source_monthly), 'SOURCE_CAT');
+  data.sort((a,b)=>b.Total_Package-a.Total_Package);
 
-  let html = `<div class="kpi-strip" style="margin-bottom:24px">`;
-  if (totRow) {
-    html += `<div class="kpi"><div class="kpi-label">Students</div><div class="kpi-value">${totRow.students}</div></div>`;
-    html += `<div class="kpi"><div class="kpi-label">Total Package</div><div class="kpi-value">${fmtL(totRow.total_package)}</div></div>`;
-    html += `<div class="kpi"><div class="kpi-label">Total Spot</div><div class="kpi-value">${fmtL(totRow.total_spot)}</div></div>`;
-    html += `<div class="kpi"><div class="kpi-label">Spot Rate</div><div class="kpi-value">${(totRow.total_spot/totRow.total_package*100).toFixed(1)}%</div></div>`;
-  }
-  html += `</div>`;
-  html += sectionTable('Course Breakdown', DATA.monthly_course, 'Course');
-  html += sectionTable('Syllabus Breakdown', DATA.monthly_syllabus, 'Syllabus');
-  html += sectionTable('Class Breakdown', DATA.monthly_class, 'Class');
-  html += sectionTable('Country Package (Subdivision)', DATA.monthly_subdivision, 'Subdivision');
+  destroyChart('sourceBarChart');
+  charts['sourceBarChart'] = new Chart(document.getElementById('sourceBarChart'), {
+    type: 'bar',
+    data: {
+      labels: data.map(r=>r.SOURCE_CAT),
+      datasets: [
+        { label: 'Package', data: data.map(r=>r.Total_Package), backgroundColor: 'rgba(245,166,35,.7)', borderRadius: 4 },
+        { label: 'Spot', data: data.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.6)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend:{display:false}, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',callback:v=>fmtL(v)} },
+        y: { grid:{display:false}, ticks:{color:'#e8eaf0',font:{size:12}} }
+      }
+    }
+  });
 
-  document.getElementById('detailTableArea').innerHTML = html;
+  const filtered = filterByMonth(DATA.source_monthly).sort((a,b) => {
+    const mi = MONTHS.indexOf(a.MONTH) - MONTHS.indexOf(b.MONTH);
+    return mi !== 0 ? mi : a.SOURCE_CAT.localeCompare(b.SOURCE_CAT);
+  });
+
+  let html = '';
+  filtered.forEach(r => {
+    html += `<tr>
+      <td class="month-col">${r.MONTH}</td>
+      <td class="source-col">${r.SOURCE_CAT}</td>
+      <td class="num">${r.Admissions}</td>
+      <td class="num pkg-val">${fmt(r.Total_Package)}</td>
+      <td class="num spot-val">${fmt(r.Total_Spot)}</td>
+    </tr>`;
+  });
+  document.getElementById('sourceTableBody').innerHTML = html;
 }
-buildDetailFilter();
-renderDetailTables();
 
-// ── NAV ACTIVE ──
-const navLinks = document.querySelectorAll('.nav a');
-const secs = document.querySelectorAll('section');
-window.addEventListener('scroll', ()=>{
-  let cur = '';
-  secs.forEach(s=>{ if(window.scrollY>=s.offsetTop-80) cur=s.id; });
-  navLinks.forEach(a=>{ a.classList.toggle('active', a.getAttribute('href')==='#'+cur); });
-});
+// ── COUNTRY VIEW ──────────────────────────────────────────────────────────
+function renderCountry() {
+  const data = aggregateBy(filterByMonth(DATA.country_monthly), 'COUNTRY');
+  data.sort((a,b)=>b.Total_Package-a.Total_Package);
+
+  destroyChart('countryBarChart');
+  charts['countryBarChart'] = new Chart(document.getElementById('countryBarChart'), {
+    type: 'bar',
+    data: {
+      labels: data.map(r=>r.COUNTRY),
+      datasets: [
+        { label: 'Package', data: data.map(r=>r.Total_Package), backgroundColor: 'rgba(245,166,35,.7)', borderRadius: 4 },
+        { label: 'Spot', data: data.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.6)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend:{display:false}, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',callback:v=>fmtL(v)} },
+        y: { grid:{display:false}, ticks:{color:'#e8eaf0',font:{size:12}} }
+      }
+    }
+  });
+
+  const filtered = filterByMonth(DATA.country_monthly).sort((a,b) => {
+    const mi = MONTHS.indexOf(a.MONTH) - MONTHS.indexOf(b.MONTH);
+    return mi !== 0 ? mi : a.COUNTRY.localeCompare(b.COUNTRY);
+  });
+
+  let html = '';
+  filtered.forEach(r => {
+    html += `<tr>
+      <td class="month-col">${r.MONTH}</td>
+      <td class="country-col">${r.COUNTRY}</td>
+      <td class="num">${r.Admissions}</td>
+      <td class="num pkg-val">${fmt(r.Total_Package)}</td>
+      <td class="num spot-val">${fmt(r.Total_Spot)}</td>
+    </tr>`;
+  });
+  document.getElementById('countryTableBody').innerHTML = html;
+}
+
+// ── DETAIL TABLE ──────────────────────────────────────────────────────────
+function renderDetail() {
+  const filtered = filterByMonth(DATA.course_monthly).sort((a,b)=>{
+    const mi = MONTHS.indexOf(a.MONTH) - MONTHS.indexOf(b.MONTH);
+    return mi !== 0 ? mi : a.COURSE.localeCompare(b.COURSE);
+  });
+
+  const monthTotals = {};
+  DATA.monthly_total.forEach(r => { monthTotals[r.MONTH] = r; });
+
+  let html = '';
+  let prevMonth = '';
+
+  filtered.forEach(r => {
+    if (r.MONTH !== prevMonth && selectedMonth === 'ALL') {
+      const mt = monthTotals[r.MONTH];
+      if (mt) {
+        html += `<tr class="total-row">
+          <td class="month-col">${r.MONTH} TOTAL</td>
+          <td>— All Courses —</td>
+          <td class="num">${mt.Admissions}</td>
+          <td class="num pkg-val">${fmt(mt.Total_Package)}</td>
+          <td class="num spot-val">${fmt(mt.Total_Spot)}</td>
+          <td class="num" style="color:#e87de8">${fmt(mt.Total_Package-mt.Total_Spot)}</td>
+        </tr>`;
+      }
+      prevMonth = r.MONTH;
+    }
+    const gap = r.Total_Package - r.Total_Spot;
+    html += `<tr>
+      <td class="month-col">${selectedMonth === 'ALL' ? '' : r.MONTH}</td>
+      <td class="course-col">${r.COURSE}</td>
+      <td class="num">${r.Admissions}</td>
+      <td class="num pkg-val">${fmt(r.Total_Package)}</td>
+      <td class="num spot-val">${fmt(r.Total_Spot)}</td>
+      <td class="num" style="color:#e87de8">${fmt(gap)}</td>
+    </tr>`;
+  });
+  document.getElementById('detailBody').innerHTML = html;
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────
+function renderAll() {
+  renderKPI();
+  if (activeTab === 'overview') renderOverview();
+  if (activeTab === 'course') renderCourse();
+  if (activeTab === 'source') renderSource();
+  if (activeTab === 'country') renderCountry();
+  if (activeTab === 'detail') renderDetail();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+buildMonthBar();
+renderAll();
 </script>
 </body>
 </html>

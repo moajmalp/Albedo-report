@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Albedo Education — 2025 Performance Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1f2535;
+    --border: rgba(255,255,255,0.07);
+    --accent: #f5a623;
+    --accent2: #5c9eff;
+    --accent3: #7de8b0;
+    --accent4: #e87de8;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --pkg: #f5a623;
+    --spot: #5c9eff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 28px 36px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: linear-gradient(135deg, #0f1117 0%, #151a26 100%);
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    color: #fff;
+  }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .year-badge {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+
+  /* ── NAV TABS ── */
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    padding: 16px 36px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    padding: 9px 18px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── MONTH SELECTOR ── */
+  .month-bar {
+    display: flex;
+    gap: 6px;
+    padding: 14px 36px;
+    overflow-x: auto;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .month-btn {
+    padding: 5px 13px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .month-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .month-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .month-btn.all-months {
+    background: var(--surface2);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .month-btn.all-months.active {
+    background: var(--accent2);
+    color: #fff;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main { padding: 24px 36px; }
+
+  /* ── KPI CARDS ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+  .kpi.blue::before { background: var(--accent2); }
+  .kpi.green::before { background: var(--accent3); }
+  .kpi.pink::before { background: var(--accent4); }
+  .kpi-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+  .kpi-value { font-family: 'DM Serif Display', serif; font-size: 28px; color: #fff; }
+  .kpi-sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: #fff;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── CHART GRID ── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  .chart-grid.full { grid-template-columns: 1fr; }
+  @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .chart-card h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 16px;
+  }
+  .chart-wrap { position: relative; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin-bottom: 24px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    padding: 10px 14px;
+    text-align: left;
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+  }
+  thead th.num { text-align: right; }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .1s;
+  }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  tbody td { padding: 9px 14px; }
+  tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody td.month-col { font-weight: 600; color: var(--accent); white-space: nowrap; }
+  tbody td.course-col { color: var(--accent2); font-weight: 500; }
+  tbody td.source-col { color: var(--accent3); }
+  tbody td.country-col { color: var(--accent4); }
+  .pkg-val { color: var(--pkg); }
+  .spot-val { color: var(--spot); }
+  tbody tr.total-row td { font-weight: 600; background: var(--surface2); }
+
+  /* ── PILL BADGES ── */
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .pill-yt { background: rgba(245,166,35,.15); color: var(--accent); }
+  .pill-ig { background: rgba(232,125,232,.15); color: var(--accent4); }
+  .pill-ref { background: rgba(125,232,176,.15); color: var(--accent3); }
+  .pill-camp { background: rgba(92,158,255,.15); color: var(--accent2); }
+
+  /* ── HIDDEN VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── LEGEND ── */
+  .legend-row {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+  }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.pkg { background: var(--pkg); }
+  .legend-dot.spot { background: var(--spot); }
+  .legend-dot.adm { background: var(--accent3); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Albedo <span>Education</span> — Performance Dashboard</h1>
+    <p>January 2025 – December 2025 · Admissions Analysis</p>
+  </div>
+  <div class="year-badge">2025 ANNUAL</div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+  <button class="tab-btn" onclick="switchTab('course')">By Course</button>
+  <button class="tab-btn" onclick="switchTab('source')">By Source</button>
+  <button class="tab-btn" onclick="switchTab('country')">By Country</button>
+  <button class="tab-btn" onclick="switchTab('detail')">Full Detail Table</button>
+</nav>
+
+<div class="month-bar" id="monthBar"></div>
+
+<main>
+  <!-- OVERVIEW -->
+  <div class="view active" id="view-overview">
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="chart-grid full">
+      <div class="chart-card">
+        <h3>Monthly Admissions &amp; Revenue Trend</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot pkg"></div>Total Package</div>
+          <div class="legend-item"><div class="legend-dot spot"></div>Total Spot</div>
+          <div class="legend-item"><div class="legend-dot adm"></div>Admissions</div>
+        </div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="overviewChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Course Mix — Admissions Share</h3>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="courseDonut"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Lead Source Mix — Admissions Share</h3>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="sourceDonut"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>Country Distribution — Admissions</h3>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="countryDonut"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Package vs Spot Gap by Month</h3>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="gapChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSE -->
+  <div class="view" id="view-course">
+    <div class="chart-grid full">
+      <div class="chart-card">
+        <h3>Course Performance — Package &amp; Spot</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot pkg"></div>Total Package</div>
+          <div class="legend-item"><div class="legend-dot spot"></div>Total Spot</div>
+        </div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="courseBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">Course Monthly Breakdown</div>
+    <div class="table-wrap">
+      <table id="courseTable">
+        <thead><tr>
+          <th>Month</th><th>Course</th>
+          <th class="num">Admissions</th>
+          <th class="num">Package (₹)</th>
+          <th class="num">Spot (₹)</th>
+        </tr></thead>
+        <tbody id="courseTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SOURCE -->
+  <div class="view" id="view-source">
+    <div class="chart-grid full">
+      <div class="chart-card">
+        <h3>Lead Source Performance — Package &amp; Spot</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot pkg"></div>Total Package</div>
+          <div class="legend-item"><div class="legend-dot spot"></div>Total Spot</div>
+        </div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="sourceBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">Source Monthly Breakdown</div>
+    <div class="table-wrap">
+      <table id="sourceTable">
+        <thead><tr>
+          <th>Month</th><th>Source</th>
+          <th class="num">Admissions</th>
+          <th class="num">Package (₹)</th>
+          <th class="num">Spot (₹)</th>
+        </tr></thead>
+        <tbody id="sourceTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COUNTRY -->
+  <div class="view" id="view-country">
+    <div class="chart-grid full">
+      <div class="chart-card">
+        <h3>Country Performance — Package &amp; Spot</h3>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot pkg"></div>Total Package</div>
+          <div class="legend-item"><div class="legend-dot spot"></div>Total Spot</div>
+        </div>
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="countryBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">Country Monthly Breakdown</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Month</th><th>Country</th>
+          <th class="num">Admissions</th>
+          <th class="num">Package (₹)</th>
+          <th class="num">Spot (₹)</th>
+        </tr></thead>
+        <tbody id="countryTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FULL DETAIL TABLE -->
+  <div class="view" id="view-detail">
+    <div class="section-title">Full Monthly Course Summary</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Month</th>
+          <th>Course</th>
+          <th class="num">Admissions</th>
+          <th class="num">Total Package (₹)</th>
+          <th class="num">Total Spot (₹)</th>
+          <th class="num">Pkg−Spot Gap (₹)</th>
+        </tr></thead>
+        <tbody id="detailBody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const DATA = {"course_monthly": [{"MONTH": "JANUARY", "COURSE": "ACADEMICS", "Admissions": 37, "Total_Package": 436270.0, "Total_Spot": 335957.0}, {"MONTH": "JANUARY", "COURSE": "BASICS", "Admissions": 42, "Total_Package": 355900.0, "Total_Spot": 274853.0}, {"MONTH": "JANUARY", "COURSE": "BASICS & ACADEMICS", "Admissions": 12, "Total_Package": 147150.0, "Total_Spot": 132300.0}, {"MONTH": "JANUARY", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 10400.0, "Total_Spot": 5500.0}, {"MONTH": "JANUARY", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 8000.0, "Total_Spot": 4500.0}, {"MONTH": "JANUARY", "COURSE": "ONLINE BATCH", "Admissions": 25, "Total_Package": 168525.0, "Total_Spot": 142275.0}, {"MONTH": "JANUARY", "COURSE": "REVISION BATCH", "Admissions": 5, "Total_Package": 12499.0, "Total_Spot": 12499.0}, {"MONTH": "JANUARY", "COURSE": "REVISION INDIVIDUAL", "Admissions": 6, "Total_Package": 72400.0, "Total_Spot": 57000.0}, {"MONTH": "FEBRUARY", "COURSE": "ACADEMICS", "Admissions": 28, "Total_Package": 471087.0, "Total_Spot": 360757.0}, {"MONTH": "FEBRUARY", "COURSE": "BASICS", "Admissions": 24, "Total_Package": 231500.0, "Total_Spot": 165350.0}, {"MONTH": "FEBRUARY", "COURSE": "BASICS & ACADEMICS", "Admissions": 3, "Total_Package": 26750.0, "Total_Spot": 20000.0}, {"MONTH": "FEBRUARY", "COURSE": "DISTANCE EDUCATION", "Admissions": 1, "Total_Package": 12500.0, "Total_Spot": 12500.0}, {"MONTH": "FEBRUARY", "COURSE": "E-SPEAK", "Admissions": 3, "Total_Package": 37800.0, "Total_Spot": 34100.0}, {"MONTH": "FEBRUARY", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 10500.0, "Total_Spot": 9500.0}, {"MONTH": "FEBRUARY", "COURSE": "KG FOUNDATION COURSE", "Admissions": 1, "Total_Package": 10500.0, "Total_Spot": 6500.0}, {"MONTH": "FEBRUARY", "COURSE": "ONLINE BATCH", "Admissions": 2, "Total_Package": 59998.0, "Total_Spot": 24000.0}, {"MONTH": "FEBRUARY", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 54500.0, "Total_Spot": 54500.0}, {"MONTH": "FEBRUARY", "COURSE": "REVISION BATCH", "Admissions": 12, "Total_Package": 22797.0, "Total_Spot": 22797.0}, {"MONTH": "FEBRUARY", "COURSE": "REVISION INDIVIDUAL", "Admissions": 9, "Total_Package": 51900.0, "Total_Spot": 49000.0}, {"MONTH": "MARCH", "COURSE": "ABACUS", "Admissions": 3, "Total_Package": 19740.0, "Total_Spot": 19740.0}, {"MONTH": "MARCH", "COURSE": "ACADEMICS", "Admissions": 20, "Total_Package": 606120.0, "Total_Spot": 382220.0}, {"MONTH": "MARCH", "COURSE": "ADVANCED BASICS", "Admissions": 1, "Total_Package": 7500.0, "Total_Spot": 5000.0}, {"MONTH": "MARCH", "COURSE": "BASICS", "Admissions": 35, "Total_Package": 269600.0, "Total_Spot": 238950.0}, {"MONTH": "MARCH", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 9200.0, "Total_Spot": 9200.0}, {"MONTH": "MARCH", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 12100.0, "Total_Spot": 12000.0}, {"MONTH": "MARCH", "COURSE": "ONLINE BATCH", "Admissions": 13, "Total_Package": 278489.0, "Total_Spot": 90343.0}, {"MONTH": "MARCH", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 38900.0, "Total_Spot": 18500.0}, {"MONTH": "MARCH", "COURSE": "REVISION INDIVIDUAL", "Admissions": 2, "Total_Package": 5400.0, "Total_Spot": 5400.0}, {"MONTH": "APRIL", "COURSE": "ACADEMICS", "Admissions": 29, "Total_Package": 959470.0, "Total_Spot": 592670.0}, {"MONTH": "APRIL", "COURSE": "ALBEDO JUNIOR", "Admissions": 1, "Total_Package": 46780.0, "Total_Spot": 16000.0}, {"MONTH": "APRIL", "COURSE": "ALBEDO JUNIOR KG", "Admissions": 1, "Total_Package": 48000.0, "Total_Spot": 15000.0}, {"MONTH": "APRIL", "COURSE": "BASICS", "Admissions": 99, "Total_Package": 829745.0, "Total_Spot": 785375.0}, {"MONTH": "APRIL", "COURSE": "BASICS & ACADEMICS", "Admissions": 11, "Total_Package": 229375.0, "Total_Spot": 144025.0}, {"MONTH": "APRIL", "COURSE": "E-SPEAK", "Admissions": 2, "Total_Package": 15000.0, "Total_Spot": 15000.0}, {"MONTH": "APRIL", "COURSE": "KINDERGARTEN JUNIOR", "Admissions": 2, "Total_Package": 89200.0, "Total_Spot": 44200.0}, {"MONTH": "APRIL", "COURSE": "ONLINE BATCH", "Admissions": 14, "Total_Package": 261997.0, "Total_Spot": 91997.0}, {"MONTH": "APRIL", "COURSE": "ONLINE SCHOOLING", "Admissions": 4, "Total_Package": 200850.0, "Total_Spot": 88850.0}, {"MONTH": "MAY", "COURSE": "ACADEMICS", "Admissions": 27, "Total_Package": 972990.0, "Total_Spot": 564974.0}, {"MONTH": "MAY", "COURSE": "ADVANCED BASICS", "Admissions": 1, "Total_Package": 9500.0, "Total_Spot": 5500.0}, {"MONTH": "MAY", "COURSE": "BASICS", "Admissions": 102, "Total_Package": 882647.0, "Total_Spot": 740895.0}, {"MONTH": "MAY", "COURSE": "BASICS & ACADEMICS", "Admissions": 11, "Total_Package": 369545.0, "Total_Spot": 196600.0}, {"MONTH": "MAY", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 12500.0, "Total_Spot": 4000.0}, {"MONTH": "MAY", "COURSE": "ONLINE BATCH", "Admissions": 15, "Total_Package": 405000.0, "Total_Spot": 88000.0}, {"MONTH": "MAY", "COURSE": "ONLINE SCHOOLING", "Admissions": 8, "Total_Package": 500335.0, "Total_Spot": 296700.0}, {"MONTH": "MAY", "COURSE": "SAY EXAM", "Admissions": 2, "Total_Package": 38025.0, "Total_Spot": 17625.0}, {"MONTH": "JUNE", "COURSE": "ABACUS", "Admissions": 1, "Total_Package": 10000.0, "Total_Spot": 10000.0}, {"MONTH": "JUNE", "COURSE": "ACADEMICS", "Admissions": 45, "Total_Package": 1412235.0, "Total_Spot": 908384.0}, {"MONTH": "JUNE", "COURSE": "BASICS", "Admissions": 59, "Total_Package": 523140.0, "Total_Spot": 409050.0}, {"MONTH": "JUNE", "COURSE": "BASICS & ACADEMICS", "Admissions": 9, "Total_Package": 211150.0, "Total_Spot": 147225.0}, {"MONTH": "JUNE", "COURSE": "E-SPEAK", "Admissions": 5, "Total_Package": 49700.0, "Total_Spot": 35200.0}, {"MONTH": "JUNE", "COURSE": "ONLINE BATCH", "Admissions": 19, "Total_Package": 453500.0, "Total_Spot": 88000.0}, {"MONTH": "JUNE", "COURSE": "ONLINE SCHOOLING", "Admissions": 6, "Total_Package": 323250.0, "Total_Spot": 200050.0}, {"MONTH": "JULY", "COURSE": "ACADEMICS", "Admissions": 51, "Total_Package": 1590415.0, "Total_Spot": 862110.0}, {"MONTH": "JULY", "COURSE": "BASICS", "Admissions": 55, "Total_Package": 488850.0, "Total_Spot": 412710.0}, {"MONTH": "JULY", "COURSE": "BASICS & ACADEMICS", "Admissions": 10, "Total_Package": 235525.0, "Total_Spot": 162275.0}, {"MONTH": "JULY", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 18100.0, "Total_Spot": 10500.0}, {"MONTH": "JULY", "COURSE": "ONLINE BATCH", "Admissions": 10, "Total_Package": 250200.0, "Total_Spot": 55300.0}, {"MONTH": "JULY", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 61260.0, "Total_Spot": 61260.0}, {"MONTH": "JULY", "COURSE": "REVISION BATCH", "Admissions": 1, "Total_Package": 2700.0, "Total_Spot": 2700.0}, {"MONTH": "JULY", "COURSE": "REVISION INDIVIDUAL", "Admissions": 1, "Total_Package": 36500.0, "Total_Spot": 36500.0}, {"MONTH": "AUGUST", "COURSE": "ACADEMICS", "Admissions": 62, "Total_Package": 1339545.0, "Total_Spot": 922280.0}, {"MONTH": "AUGUST", "COURSE": "BASICS", "Admissions": 87, "Total_Package": 755840.0, "Total_Spot": 613238.0}, {"MONTH": "AUGUST", "COURSE": "BASICS & ACADEMICS", "Admissions": 28, "Total_Package": 730920.0, "Total_Spot": 456180.0}, {"MONTH": "AUGUST", "COURSE": "DISTANCE EDUCATION", "Admissions": 1, "Total_Package": 50500.0, "Total_Spot": 35500.0}, {"MONTH": "AUGUST", "COURSE": "E-SPEAK", "Admissions": 3, "Total_Package": 38300.0, "Total_Spot": 31700.0}, {"MONTH": "AUGUST", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 6700.0, "Total_Spot": 6700.0}, {"MONTH": "AUGUST", "COURSE": "ONLINE BATCH", "Admissions": 5, "Total_Package": 88500.0, "Total_Spot": 23500.0}, {"MONTH": "AUGUST", "COURSE": "ONLINE SCHOOLING", "Admissions": 5, "Total_Package": 285605.0, "Total_Spot": 170780.0}, {"MONTH": "AUGUST", "COURSE": "REVISION BATCH", "Admissions": 2, "Total_Package": 5400.0, "Total_Spot": 5400.0}, {"MONTH": "AUGUST", "COURSE": "REVISION INDIVIDUAL", "Admissions": 2, "Total_Package": 15650.0, "Total_Spot": 12400.0}, {"MONTH": "SEPTEMBER", "COURSE": "ACADEMICS", "Admissions": 63, "Total_Package": 1284200.0, "Total_Spot": 980430.0}, {"MONTH": "SEPTEMBER", "COURSE": "BASICS", "Admissions": 52, "Total_Package": 486400.0, "Total_Spot": 433850.0}, {"MONTH": "SEPTEMBER", "COURSE": "BASICS & ACADEMICS", "Admissions": 20, "Total_Package": 720715.0, "Total_Spot": 482800.0}, {"MONTH": "SEPTEMBER", "COURSE": "E-SPEAK", "Admissions": 1, "Total_Package": 11900.0, "Total_Spot": 11900.0}, {"MONTH": "SEPTEMBER", "COURSE": "ONLINE BATCH", "Admissions": 19, "Total_Package": 297500.0, "Total_Spot": 87500.0}, {"MONTH": "SEPTEMBER", "COURSE": "ONLINE SCHOOLING", "Admissions": 6, "Total_Package": 364975.0, "Total_Spot": 208040.0}, {"MONTH": "SEPTEMBER", "COURSE": "REVISION INDIVIDUAL", "Admissions": 5, "Total_Package": 46345.0, "Total_Spot": 40545.0}, {"MONTH": "OCTOBER", "COURSE": "ABACUS", "Admissions": 2, "Total_Package": 19500.0, "Total_Spot": 19500.0}, {"MONTH": "OCTOBER", "COURSE": "ACADEMICS", "Admissions": 61, "Total_Package": 1426640.0, "Total_Spot": 1041159.0}, {"MONTH": "OCTOBER", "COURSE": "ADVANCED BASICS", "Admissions": 1, "Total_Package": 9500.0, "Total_Spot": 3500.0}, {"MONTH": "OCTOBER", "COURSE": "BASICS", "Admissions": 52, "Total_Package": 522125.0, "Total_Spot": 389515.0}, {"MONTH": "OCTOBER", "COURSE": "BASICS & ACADEMICS", "Admissions": 20, "Total_Package": 527865.0, "Total_Spot": 350100.0}, {"MONTH": "OCTOBER", "COURSE": "ONLINE BATCH", "Admissions": 10, "Total_Package": 126500.0, "Total_Spot": 36500.0}, {"MONTH": "OCTOBER", "COURSE": "ONLINE SCHOOLING", "Admissions": 5, "Total_Package": 272135.0, "Total_Spot": 117645.0}, {"MONTH": "OCTOBER", "COURSE": "PLAY SCHOOL", "Admissions": 1, "Total_Package": 18400.0, "Total_Spot": 7400.0}, {"MONTH": "OCTOBER", "COURSE": "PRE KG", "Admissions": 2, "Total_Package": 48800.0, "Total_Spot": 22300.0}, {"MONTH": "NOVEMBER", "COURSE": "ABACUS", "Admissions": 1, "Total_Package": 11000.0, "Total_Spot": 5750.0}, {"MONTH": "NOVEMBER", "COURSE": "ACADEMICS", "Admissions": 50, "Total_Package": 858625.0, "Total_Spot": 582365.0}, {"MONTH": "NOVEMBER", "COURSE": "BASICS", "Admissions": 51, "Total_Package": 492075.0, "Total_Spot": 387610.0}, {"MONTH": "NOVEMBER", "COURSE": "BASICS & ACADEMICS", "Admissions": 10, "Total_Package": 202610.0, "Total_Spot": 137000.0}, {"MONTH": "NOVEMBER", "COURSE": "E-SPEAK", "Admissions": 3, "Total_Package": 30050.0, "Total_Spot": 21050.0}, {"MONTH": "NOVEMBER", "COURSE": "ONLINE BATCH", "Admissions": 13, "Total_Package": 147000.0, "Total_Spot": 42500.0}, {"MONTH": "NOVEMBER", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 54500.0, "Total_Spot": 10000.0}, {"MONTH": "NOVEMBER", "COURSE": "REVISION INDIVIDUAL", "Admissions": 5, "Total_Package": 49498.0, "Total_Spot": 41398.0}, {"MONTH": "DECEMBER", "COURSE": "ABACUS", "Admissions": 1, "Total_Package": 5300.0, "Total_Spot": 5300.0}, {"MONTH": "DECEMBER", "COURSE": "ACADEMICS", "Admissions": 57, "Total_Package": 844215.0, "Total_Spot": 695125.0}, {"MONTH": "DECEMBER", "COURSE": "BASICS", "Admissions": 57, "Total_Package": 494425.0, "Total_Spot": 445535.0}, {"MONTH": "DECEMBER", "COURSE": "BASICS & ACADEMICS", "Admissions": 20, "Total_Package": 366935.0, "Total_Spot": 278605.0}, {"MONTH": "DECEMBER", "COURSE": "E-SPEAK", "Admissions": 2, "Total_Package": 19900.0, "Total_Spot": 16900.0}, {"MONTH": "DECEMBER", "COURSE": "EXAM COACHING", "Admissions": 1, "Total_Package": 5750.0, "Total_Spot": 2250.0}, {"MONTH": "DECEMBER", "COURSE": "ONLINE BATCH", "Admissions": 4, "Total_Package": 28500.0, "Total_Spot": 17500.0}, {"MONTH": "DECEMBER", "COURSE": "ONLINE SCHOOLING", "Admissions": 1, "Total_Package": 24010.0, "Total_Spot": 19500.0}, {"MONTH": "DECEMBER", "COURSE": "REVISION BATCH", "Admissions": 15, "Total_Package": 56999.0, "Total_Spot": 54571.0}, {"MONTH": "DECEMBER", "COURSE": "REVISION INDIVIDUAL", "Admissions": 12, "Total_Package": 122390.0, "Total_Spot": 94070.0}], "source_monthly": [{"MONTH": "JANUARY", "SOURCE_CAT": "Campaign/NSF", "Admissions": 9, "Total_Package": 67450.0, "Total_Spot": 49650.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 11000.0, "Total_Spot": 6500.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Instagram", "Admissions": 13, "Total_Package": 139700.0, "Total_Spot": 118003.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Other", "Admissions": 6, "Total_Package": 111900.0, "Total_Spot": 75400.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Re-Package", "Admissions": 3, "Total_Package": 22250.0, "Total_Spot": 22250.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "Reference", "Admissions": 6, "Total_Package": 79025.0, "Total_Spot": 47125.0}, {"MONTH": "JANUARY", "SOURCE_CAT": "YouTube", "Admissions": 90, "Total_Package": 779819.0, "Total_Spot": 645956.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Campaign/NSF", "Admissions": 15, "Total_Package": 169700.0, "Total_Spot": 139970.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Facebook", "Admissions": 1, "Total_Package": 97850.0, "Total_Spot": 50000.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 3000.0, "Total_Spot": 3000.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Instagram", "Admissions": 9, "Total_Package": 135852.0, "Total_Spot": 121852.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Other", "Admissions": 4, "Total_Package": 27350.0, "Total_Spot": 25100.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Re-Package", "Admissions": 7, "Total_Package": 50399.0, "Total_Spot": 35499.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "Reference", "Admissions": 5, "Total_Package": 35499.0, "Total_Spot": 28749.0}, {"MONTH": "FEBRUARY", "SOURCE_CAT": "YouTube", "Admissions": 43, "Total_Package": 470182.0, "Total_Spot": 354834.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Campaign/NSF", "Admissions": 22, "Total_Package": 206489.0, "Total_Spot": 165689.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 1, "Total_Package": 6750.0, "Total_Spot": 6750.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 11000.0, "Total_Spot": 11000.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 13000.0, "Total_Spot": 8000.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Instagram", "Admissions": 5, "Total_Package": 60200.0, "Total_Spot": 39800.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Other", "Admissions": 1, "Total_Package": 3000.0, "Total_Spot": 3000.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Re-Package", "Admissions": 2, "Total_Package": 39000.0, "Total_Spot": 11999.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Reference", "Admissions": 9, "Total_Package": 173650.0, "Total_Spot": 117300.0}, {"MONTH": "MARCH", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 4, "Total_Package": 72000.0, "Total_Spot": 24000.0}, {"MONTH": "MARCH", "SOURCE_CAT": "YouTube", "Admissions": 30, "Total_Package": 661960.0, "Total_Spot": 393815.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Campaign/NSF", "Admissions": 31, "Total_Package": 418000.0, "Total_Spot": 311550.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 10, "Total_Package": 256670.0, "Total_Spot": 176950.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Facebook", "Admissions": 4, "Total_Package": 40300.0, "Total_Spot": 40300.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Google/Website", "Admissions": 3, "Total_Package": 61500.0, "Total_Spot": 38500.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Instagram", "Admissions": 22, "Total_Package": 311930.0, "Total_Spot": 262500.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Other", "Admissions": 6, "Total_Package": 44600.0, "Total_Spot": 42100.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Re-Package", "Admissions": 9, "Total_Package": 246830.0, "Total_Spot": 129780.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Reference", "Admissions": 14, "Total_Package": 246790.0, "Total_Spot": 147190.0}, {"MONTH": "APRIL", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 4, "Total_Package": 83300.0, "Total_Spot": 72300.0}, {"MONTH": "APRIL", "SOURCE_CAT": "YouTube", "Admissions": 60, "Total_Package": 970497.0, "Total_Spot": 571947.0}, {"MONTH": "MAY", "SOURCE_CAT": "Campaign/NSF", "Admissions": 35, "Total_Package": 426375.0, "Total_Spot": 281675.0}, {"MONTH": "MAY", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 5, "Total_Package": 61325.0, "Total_Spot": 38925.0}, {"MONTH": "MAY", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 37700.0, "Total_Spot": 37700.0}, {"MONTH": "MAY", "SOURCE_CAT": "Instagram", "Admissions": 19, "Total_Package": 371250.0, "Total_Spot": 182650.0}, {"MONTH": "MAY", "SOURCE_CAT": "Other", "Admissions": 5, "Total_Package": 182115.0, "Total_Spot": 68420.0}, {"MONTH": "MAY", "SOURCE_CAT": "Re-Package", "Admissions": 10, "Total_Package": 270775.0, "Total_Spot": 76655.0}, {"MONTH": "MAY", "SOURCE_CAT": "Reference", "Admissions": 14, "Total_Package": 278945.0, "Total_Spot": 202969.0}, {"MONTH": "MAY", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 2, "Total_Package": 24550.0, "Total_Spot": 14250.0}, {"MONTH": "MAY", "SOURCE_CAT": "YouTube", "Admissions": 75, "Total_Package": 1537507.0, "Total_Spot": 1011050.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Campaign/NSF", "Admissions": 14, "Total_Package": 158525.0, "Total_Spot": 112225.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 2, "Total_Package": 111100.0, "Total_Spot": 82500.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 62500.0, "Total_Spot": 13500.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Instagram", "Admissions": 11, "Total_Package": 213450.0, "Total_Spot": 148223.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Re-Package", "Admissions": 2, "Total_Package": 45100.0, "Total_Spot": 45100.0}, {"MONTH": "JUNE", "SOURCE_CAT": "Reference", "Admissions": 18, "Total_Package": 361475.0, "Total_Spot": 251900.0}, {"MONTH": "JUNE", "SOURCE_CAT": "YouTube", "Admissions": 95, "Total_Package": 2030825.0, "Total_Spot": 1144461.0}, {"MONTH": "JULY", "SOURCE_CAT": "Campaign/NSF", "Admissions": 19, "Total_Package": 227365.0, "Total_Spot": 146065.0}, {"MONTH": "JULY", "SOURCE_CAT": "Facebook", "Admissions": 4, "Total_Package": 93500.0, "Total_Spot": 39625.0}, {"MONTH": "JULY", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 13300.0, "Total_Spot": 6900.0}, {"MONTH": "JULY", "SOURCE_CAT": "Instagram", "Admissions": 22, "Total_Package": 297825.0, "Total_Spot": 219625.0}, {"MONTH": "JULY", "SOURCE_CAT": "Other", "Admissions": 6, "Total_Package": 87890.0, "Total_Spot": 41600.0}, {"MONTH": "JULY", "SOURCE_CAT": "Re-Package", "Admissions": 2, "Total_Package": 23280.0, "Total_Spot": 14640.0}, {"MONTH": "JULY", "SOURCE_CAT": "Reference", "Admissions": 13, "Total_Package": 464135.0, "Total_Spot": 252445.0}, {"MONTH": "JULY", "SOURCE_CAT": "YouTube", "Admissions": 63, "Total_Package": 1476255.0, "Total_Spot": 882455.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Campaign/NSF", "Admissions": 30, "Total_Package": 464530.0, "Total_Spot": 337780.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 2, "Total_Package": 30780.0, "Total_Spot": 10780.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Facebook", "Admissions": 3, "Total_Package": 74000.0, "Total_Spot": 24000.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 41800.0, "Total_Spot": 20650.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Instagram", "Admissions": 17, "Total_Package": 389515.0, "Total_Spot": 259650.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Other", "Admissions": 5, "Total_Package": 48000.0, "Total_Spot": 39250.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Re-Package", "Admissions": 6, "Total_Package": 112600.0, "Total_Spot": 80200.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Reference", "Admissions": 22, "Total_Package": 449985.0, "Total_Spot": 308113.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 1, "Total_Package": 13595.0, "Total_Spot": 13595.0}, {"MONTH": "AUGUST", "SOURCE_CAT": "YouTube", "Admissions": 109, "Total_Package": 1692155.0, "Total_Spot": 1183660.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Campaign/NSF", "Admissions": 29, "Total_Package": 530655.0, "Total_Spot": 395405.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Facebook", "Admissions": 1, "Total_Package": 5980.0, "Total_Spot": 5980.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 40100.0, "Total_Spot": 20300.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Instagram", "Admissions": 16, "Total_Package": 401750.0, "Total_Spot": 290100.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Other", "Admissions": 15, "Total_Package": 223000.0, "Total_Spot": 171545.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Re-Package", "Admissions": 5, "Total_Package": 67250.0, "Total_Spot": 50250.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Reference", "Admissions": 21, "Total_Package": 539775.0, "Total_Spot": 351575.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 3, "Total_Package": 86150.0, "Total_Spot": 70410.0}, {"MONTH": "SEPTEMBER", "SOURCE_CAT": "YouTube", "Admissions": 75, "Total_Package": 1317375.0, "Total_Spot": 889500.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Campaign/NSF", "Admissions": 23, "Total_Package": 401050.0, "Total_Spot": 251550.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Direct/Walk-in", "Admissions": 1, "Total_Package": 6100.0, "Total_Spot": 6100.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 16100.0, "Total_Spot": 16100.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 10100.0, "Total_Spot": 10100.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Instagram", "Admissions": 17, "Total_Package": 309125.0, "Total_Spot": 192325.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Other", "Admissions": 4, "Total_Package": 99250.0, "Total_Spot": 57300.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Re-Package", "Admissions": 2, "Total_Package": 15500.0, "Total_Spot": 15500.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Reference", "Admissions": 26, "Total_Package": 615115.0, "Total_Spot": 490550.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "Sheet/Tele Lead", "Admissions": 2, "Total_Package": 21500.0, "Total_Spot": 8500.0}, {"MONTH": "OCTOBER", "SOURCE_CAT": "YouTube", "Admissions": 76, "Total_Package": 1477625.0, "Total_Spot": 939594.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Campaign/NSF", "Admissions": 48, "Total_Package": 581880.0, "Total_Spot": 326990.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Facebook", "Admissions": 1, "Total_Package": 5900.0, "Total_Spot": 5900.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Google/Website", "Admissions": 3, "Total_Package": 22800.0, "Total_Spot": 15300.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Instagram", "Admissions": 12, "Total_Package": 147048.0, "Total_Spot": 118248.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Other", "Admissions": 2, "Total_Package": 46200.0, "Total_Spot": 26600.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Re-Package", "Admissions": 4, "Total_Package": 45500.0, "Total_Spot": 37400.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "Reference", "Admissions": 12, "Total_Package": 233825.0, "Total_Spot": 175185.0}, {"MONTH": "NOVEMBER", "SOURCE_CAT": "YouTube", "Admissions": 52, "Total_Package": 762205.0, "Total_Spot": 522050.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Campaign/NSF", "Admissions": 59, "Total_Package": 634145.0, "Total_Spot": 548785.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Facebook", "Admissions": 2, "Total_Package": 57350.0, "Total_Spot": 32350.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Google/Website", "Admissions": 1, "Total_Package": 13400.0, "Total_Spot": 13400.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Instagram", "Admissions": 26, "Total_Package": 289499.0, "Total_Spot": 211629.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Re-Package", "Admissions": 4, "Total_Package": 35250.0, "Total_Spot": 27850.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "Reference", "Admissions": 18, "Total_Package": 264960.0, "Total_Spot": 225320.0}, {"MONTH": "DECEMBER", "SOURCE_CAT": "YouTube", "Admissions": 60, "Total_Package": 673820.0, "Total_Spot": 570022.0}], "country_monthly": [{"MONTH": "JANUARY", "COUNTRY": "India", "Admissions": 108, "Total_Package": 1015674.0, "Total_Spot": 806527.0}, {"MONTH": "JANUARY", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 33770.0, "Total_Spot": 33770.0}, {"MONTH": "JANUARY", "COUNTRY": "Saudi Arabia", "Admissions": 2, "Total_Package": 14750.0, "Total_Spot": 14250.0}, {"MONTH": "JANUARY", "COUNTRY": "UAE", "Admissions": 11, "Total_Package": 124200.0, "Total_Spot": 94837.0}, {"MONTH": "JANUARY", "COUNTRY": "UK", "Admissions": 5, "Total_Package": 22750.0, "Total_Spot": 15500.0}, {"MONTH": "FEBRUARY", "COUNTRY": "India", "Admissions": 63, "Total_Package": 645037.0, "Total_Spot": 479459.0}, {"MONTH": "FEBRUARY", "COUNTRY": "Kuwait", "Admissions": 3, "Total_Package": 75200.0, "Total_Spot": 47200.0}, {"MONTH": "FEBRUARY", "COUNTRY": "Oman", "Admissions": 1, "Total_Package": 5500.0, "Total_Spot": 5500.0}, {"MONTH": "FEBRUARY", "COUNTRY": "Qatar", "Admissions": 1, "Total_Package": 13250.0, "Total_Spot": 6500.0}, {"MONTH": "FEBRUARY", "COUNTRY": "UAE", "Admissions": 14, "Total_Package": 240445.0, "Total_Spot": 209945.0}, {"MONTH": "FEBRUARY", "COUNTRY": "UK", "Admissions": 3, "Total_Package": 10400.0, "Total_Spot": 10400.0}, {"MONTH": "MARCH", "COUNTRY": "India", "Admissions": 49, "Total_Package": 688359.0, "Total_Spot": 407813.0}, {"MONTH": "MARCH", "COUNTRY": "Oman", "Admissions": 5, "Total_Package": 50820.0, "Total_Spot": 36320.0}, {"MONTH": "MARCH", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 32600.0, "Total_Spot": 32600.0}, {"MONTH": "MARCH", "COUNTRY": "UAE", "Admissions": 16, "Total_Package": 448870.0, "Total_Spot": 278220.0}, {"MONTH": "MARCH", "COUNTRY": "UK", "Admissions": 4, "Total_Package": 26400.0, "Total_Spot": 26400.0}, {"MONTH": "APRIL", "COUNTRY": "India", "Admissions": 138, "Total_Package": 2023517.0, "Total_Spot": 1407367.0}, {"MONTH": "APRIL", "COUNTRY": "Kuwait", "Admissions": 2, "Total_Package": 38700.0, "Total_Spot": 38700.0}, {"MONTH": "APRIL", "COUNTRY": "Oman", "Admissions": 5, "Total_Package": 61550.0, "Total_Spot": 46550.0}, {"MONTH": "APRIL", "COUNTRY": "Qatar", "Admissions": 2, "Total_Package": 12200.0, "Total_Spot": 12200.0}, {"MONTH": "APRIL", "COUNTRY": "Saudi Arabia", "Admissions": 2, "Total_Package": 52050.0, "Total_Spot": 23050.0}, {"MONTH": "APRIL", "COUNTRY": "UAE", "Admissions": 9, "Total_Package": 366100.0, "Total_Spot": 164950.0}, {"MONTH": "APRIL", "COUNTRY": "UK", "Admissions": 5, "Total_Package": 126300.0, "Total_Spot": 100300.0}, {"MONTH": "MAY", "COUNTRY": "India", "Admissions": 140, "Total_Package": 2511397.0, "Total_Spot": 1543315.0}, {"MONTH": "MAY", "COUNTRY": "Kuwait", "Admissions": 1, "Total_Package": 30000.0, "Total_Spot": 6000.0}, {"MONTH": "MAY", "COUNTRY": "Oman", "Admissions": 1, "Total_Package": 50900.0, "Total_Spot": 30000.0}, {"MONTH": "MAY", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 62350.0, "Total_Spot": 47480.0}, {"MONTH": "MAY", "COUNTRY": "Saudi Arabia", "Admissions": 5, "Total_Package": 111725.0, "Total_Spot": 61824.0}, {"MONTH": "MAY", "COUNTRY": "UAE", "Admissions": 12, "Total_Package": 360770.0, "Total_Spot": 193275.0}, {"MONTH": "MAY", "COUNTRY": "UK", "Admissions": 5, "Total_Package": 63400.0, "Total_Spot": 32400.0}, {"MONTH": "JUNE", "COUNTRY": "India", "Admissions": 114, "Total_Package": 2427475.0, "Total_Spot": 1394309.0}, {"MONTH": "JUNE", "COUNTRY": "Kuwait", "Admissions": 2, "Total_Package": 62500.0, "Total_Spot": 31400.0}, {"MONTH": "JUNE", "COUNTRY": "Oman", "Admissions": 7, "Total_Package": 79200.0, "Total_Spot": 73200.0}, {"MONTH": "JUNE", "COUNTRY": "Saudi Arabia", "Admissions": 1, "Total_Package": 17300.0, "Total_Spot": 17300.0}, {"MONTH": "JUNE", "COUNTRY": "UAE", "Admissions": 9, "Total_Package": 169800.0, "Total_Spot": 140700.0}, {"MONTH": "JUNE", "COUNTRY": "UK", "Admissions": 11, "Total_Package": 226700.0, "Total_Spot": 141000.0}, {"MONTH": "JULY", "COUNTRY": "Bahrain", "Admissions": 1, "Total_Package": 28500.0, "Total_Spot": 11000.0}, {"MONTH": "JULY", "COUNTRY": "India", "Admissions": 102, "Total_Package": 1926405.0, "Total_Spot": 1145510.0}, {"MONTH": "JULY", "COUNTRY": "Kuwait", "Admissions": 1, "Total_Package": 15500.0, "Total_Spot": 15500.0}, {"MONTH": "JULY", "COUNTRY": "Oman", "Admissions": 3, "Total_Package": 71375.0, "Total_Spot": 39200.0}, {"MONTH": "JULY", "COUNTRY": "Qatar", "Admissions": 2, "Total_Package": 11600.0, "Total_Spot": 8700.0}, {"MONTH": "JULY", "COUNTRY": "UAE", "Admissions": 15, "Total_Package": 518150.0, "Total_Spot": 312925.0}, {"MONTH": "JULY", "COUNTRY": "UK", "Admissions": 6, "Total_Package": 112020.0, "Total_Spot": 70520.0}, {"MONTH": "AUGUST", "COUNTRY": "Bahrain", "Admissions": 1, "Total_Package": 5700.0, "Total_Spot": 5700.0}, {"MONTH": "AUGUST", "COUNTRY": "India", "Admissions": 163, "Total_Package": 2681265.0, "Total_Spot": 1820845.0}, {"MONTH": "AUGUST", "COUNTRY": "Malaysia", "Admissions": 1, "Total_Package": 23620.0, "Total_Spot": 23620.0}, {"MONTH": "AUGUST", "COUNTRY": "Oman", "Admissions": 3, "Total_Package": 35300.0, "Total_Spot": 35300.0}, {"MONTH": "AUGUST", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 36750.0, "Total_Spot": 22500.0}, {"MONTH": "AUGUST", "COUNTRY": "Saudi Arabia", "Admissions": 1, "Total_Package": 28500.0, "Total_Spot": 17100.0}, {"MONTH": "AUGUST", "COUNTRY": "UAE", "Admissions": 18, "Total_Package": 356555.0, "Total_Spot": 258543.0}, {"MONTH": "AUGUST", "COUNTRY": "UK", "Admissions": 6, "Total_Package": 149270.0, "Total_Spot": 94070.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "India", "Admissions": 134, "Total_Package": 2637355.0, "Total_Spot": 1847935.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "Kuwait", "Admissions": 5, "Total_Package": 103250.0, "Total_Spot": 103250.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "Oman", "Admissions": 1, "Total_Package": 18000.0, "Total_Spot": 10500.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "Qatar", "Admissions": 4, "Total_Package": 48950.0, "Total_Spot": 43100.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "UAE", "Admissions": 12, "Total_Package": 211980.0, "Total_Spot": 148580.0}, {"MONTH": "SEPTEMBER", "COUNTRY": "UK", "Admissions": 10, "Total_Package": 192500.0, "Total_Spot": 91700.0}, {"MONTH": "OCTOBER", "COUNTRY": "Bahrain", "Admissions": 1, "Total_Package": 6100.0, "Total_Spot": 6100.0}, {"MONTH": "OCTOBER", "COUNTRY": "India", "Admissions": 131, "Total_Package": 2419285.0, "Total_Spot": 1597540.0}, {"MONTH": "OCTOBER", "COUNTRY": "Kuwait", "Admissions": 2, "Total_Package": 109700.0, "Total_Spot": 82200.0}, {"MONTH": "OCTOBER", "COUNTRY": "Oman", "Admissions": 2, "Total_Package": 36440.0, "Total_Spot": 19500.0}, {"MONTH": "OCTOBER", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 61500.0, "Total_Spot": 59299.0}, {"MONTH": "OCTOBER", "COUNTRY": "Saudi Arabia", "Admissions": 2, "Total_Package": 18400.0, "Total_Spot": 18400.0}, {"MONTH": "OCTOBER", "COUNTRY": "UAE", "Admissions": 8, "Total_Package": 265240.0, "Total_Spot": 161640.0}, {"MONTH": "OCTOBER", "COUNTRY": "UK", "Admissions": 5, "Total_Package": 54800.0, "Total_Spot": 42940.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Bahrain", "Admissions": 2, "Total_Package": 52600.0, "Total_Spot": 52600.0}, {"MONTH": "NOVEMBER", "COUNTRY": "India", "Admissions": 102, "Total_Package": 1414658.0, "Total_Spot": 925403.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Kuwait", "Admissions": 1, "Total_Package": 7700.0, "Total_Spot": 7700.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Oman", "Admissions": 1, "Total_Package": 6300.0, "Total_Spot": 6300.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 27150.0, "Total_Spot": 18100.0}, {"MONTH": "NOVEMBER", "COUNTRY": "Saudi Arabia", "Admissions": 4, "Total_Package": 54800.0, "Total_Spot": 42220.0}, {"MONTH": "NOVEMBER", "COUNTRY": "UAE", "Admissions": 10, "Total_Package": 158300.0, "Total_Spot": 89500.0}, {"MONTH": "NOVEMBER", "COUNTRY": "UK", "Admissions": 11, "Total_Package": 123850.0, "Total_Spot": 85850.0}, {"MONTH": "DECEMBER", "COUNTRY": "Bahrain", "Admissions": 1, "Total_Package": 8000.0, "Total_Spot": 8000.0}, {"MONTH": "DECEMBER", "COUNTRY": "India", "Admissions": 134, "Total_Package": 1503830.0, "Total_Spot": 1218382.0}, {"MONTH": "DECEMBER", "COUNTRY": "Kuwait", "Admissions": 4, "Total_Package": 59250.0, "Total_Spot": 52050.0}, {"MONTH": "DECEMBER", "COUNTRY": "Oman", "Admissions": 2, "Total_Package": 24600.0, "Total_Spot": 24600.0}, {"MONTH": "DECEMBER", "COUNTRY": "Qatar", "Admissions": 3, "Total_Package": 37900.0, "Total_Spot": 30500.0}, {"MONTH": "DECEMBER", "COUNTRY": "Saudi Arabia", "Admissions": 2, "Total_Package": 19600.0, "Total_Spot": 19600.0}, {"MONTH": "DECEMBER", "COUNTRY": "UAE", "Admissions": 17, "Total_Package": 234660.0, "Total_Spot": 203140.0}, {"MONTH": "DECEMBER", "COUNTRY": "UK", "Admissions": 7, "Total_Package": 80584.0, "Total_Spot": 73084.0}], "monthly_total": [{"MONTH": "JANUARY", "Admissions": 129, "Total_Package": 1211144.0, "Total_Spot": 964884.0}, {"MONTH": "FEBRUARY", "Admissions": 85, "Total_Package": 989832.0, "Total_Spot": 759004.0}, {"MONTH": "MARCH", "Admissions": 77, "Total_Package": 1247049.0, "Total_Spot": 781353.0}, {"MONTH": "APRIL", "Admissions": 163, "Total_Package": 2680417.0, "Total_Spot": 1793117.0}, {"MONTH": "MAY", "Admissions": 167, "Total_Package": 3190542.0, "Total_Spot": 1914294.0}, {"MONTH": "JUNE", "Admissions": 144, "Total_Package": 2982975.0, "Total_Spot": 1797909.0}, {"MONTH": "JULY", "Admissions": 130, "Total_Package": 2683550.0, "Total_Spot": 1603355.0}, {"MONTH": "AUGUST", "Admissions": 196, "Total_Package": 3316960.0, "Total_Spot": 2277678.0}, {"MONTH": "SEPTEMBER", "Admissions": 166, "Total_Package": 3212035.0, "Total_Spot": 2245065.0}, {"MONTH": "OCTOBER", "Admissions": 154, "Total_Package": 2971465.0, "Total_Spot": 1987619.0}, {"MONTH": "NOVEMBER", "Admissions": 134, "Total_Package": 1845358.0, "Total_Spot": 1227673.0}, {"MONTH": "DECEMBER", "Admissions": 170, "Total_Package": 1968424.0, "Total_Spot": 1629356.0}], "month_order": ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]};
+
+const MONTHS = DATA.month_order;
+const SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let selectedMonth = 'ALL';
+let activeTab = 'overview';
+let charts = {};
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const fmtL = n => n >= 100000 ? (n/100000).toFixed(1)+'L' : Math.round(n/1000)+'K';
+
+function filterByMonth(arr, key='MONTH') {
+  if (selectedMonth === 'ALL') return arr;
+  return arr.filter(r => r[key] === selectedMonth);
+}
+
+function aggregateBy(arr, groupKey, metrics=['Total_Package','Total_Spot','Admissions']) {
+  const map = {};
+  arr.forEach(r => {
+    const k = r[groupKey];
+    if (!map[k]) map[k] = { [groupKey]: k, Total_Package: 0, Total_Spot: 0, Admissions: 0 };
+    metrics.forEach(m => { map[k][m] = (map[k][m]||0) + (r[m]||0); });
+  });
+  return Object.values(map);
+}
+
+const COLORS = {
+  pkg: '#f5a623',
+  spot: '#5c9eff',
+  green: '#7de8b0',
+  pink: '#e87de8',
+  palette: ['#f5a623','#5c9eff','#7de8b0','#e87de8','#ff7e7e','#a8d8ea','#f6d365','#c3f584','#fd79a8','#74b9ff']
+};
+
+const chartDefaults = {
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1f2535',
+      borderColor: 'rgba(255,255,255,0.1)',
+      borderWidth: 1,
+      titleColor: '#e8eaf0',
+      bodyColor: '#7a8099',
+      padding: 10,
+    }
+  },
+  scales: {
+    x: {
+      grid: { color: 'rgba(255,255,255,0.05)' },
+      ticks: { color: '#7a8099', font: { size: 11 } }
+    },
+    y: {
+      grid: { color: 'rgba(255,255,255,0.05)' },
+      ticks: { color: '#7a8099', font: { size: 11 }, callback: v => fmtL(v) }
+    }
+  }
+};
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+// ── MONTH BAR ──────────────────────────────────────────────────────────
+function buildMonthBar() {
+  const bar = document.getElementById('monthBar');
+  let html = `<button class="month-btn all-months active" onclick="selectMonth('ALL')">All Months</button>`;
+  MONTHS.forEach((m,i) => {
+    html += `<button class="month-btn" id="mb-${m}" onclick="selectMonth('${m}')">${SHORT[i]}</button>`;
+  });
+  bar.innerHTML = html;
+}
+
+function selectMonth(m) {
+  selectedMonth = m;
+  document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+  if (m === 'ALL') {
+    document.querySelector('.all-months').classList.add('active');
+  } else {
+    document.getElementById('mb-' + m).classList.add('active');
+  }
+  renderAll();
+}
+
+// ── TAB SWITCHING ────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+  document.getElementById('view-' + tab).classList.add('active');
+  renderAll();
+}
+
+// ── KPI ──────────────────────────────────────────────────────────────────
+function renderKPI() {
+  const data = filterByMonth(DATA.monthly_total);
+  const totalAdm = data.reduce((s,r) => s+r.Admissions, 0);
+  const totalPkg = data.reduce((s,r) => s+r.Total_Package, 0);
+  const totalSpot = data.reduce((s,r) => s+r.Total_Spot, 0);
+  const gap = totalPkg - totalSpot;
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Total Admissions</div>
+      <div class="kpi-value">${totalAdm.toLocaleString('en-IN')}</div>
+      <div class="kpi-sub">${selectedMonth === 'ALL' ? 'Full Year' : selectedMonth.charAt(0)+selectedMonth.slice(1).toLowerCase()}</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Total Package</div>
+      <div class="kpi-value">₹${fmtL(totalPkg)}</div>
+      <div class="kpi-sub">${Math.round(totalPkg).toLocaleString('en-IN')}</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Total Spot</div>
+      <div class="kpi-value">₹${fmtL(totalSpot)}</div>
+      <div class="kpi-sub">${Math.round(totalSpot).toLocaleString('en-IN')}</div>
+    </div>
+    <div class="kpi pink">
+      <div class="kpi-label">Pkg−Spot Gap</div>
+      <div class="kpi-value">₹${fmtL(gap)}</div>
+      <div class="kpi-sub">Balance outstanding</div>
+    </div>
+  `;
+}
+
+// ── OVERVIEW CHARTS ───────────────────────────────────────────────────────
+function renderOverview() {
+  const mt = DATA.monthly_total;
+
+  // Line+bar combo — always full year on overview
+  destroyChart('overviewChart');
+  const ctx = document.getElementById('overviewChart');
+  charts['overviewChart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: MONTHS.map((_,i)=>SHORT[i]),
+      datasets: [
+        { label: 'Total Package', data: mt.map(r=>r.Total_Package), backgroundColor: 'rgba(245,166,35,.65)', borderColor: '#f5a623', borderWidth: 1, borderRadius: 4, order: 2 },
+        { label: 'Total Spot', data: mt.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.5)', borderColor: '#5c9eff', borderWidth: 1, borderRadius: 4, order: 2 },
+        { label: 'Admissions', data: mt.map(r=>r.Admissions), type: 'line', yAxisID: 'y2', borderColor: '#7de8b0', backgroundColor: 'rgba(125,232,176,.15)', borderWidth: 2, pointBackgroundColor: '#7de8b0', pointRadius: 4, tension: 0.4, fill: true, order: 1 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a8099', font:{size:11} } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a8099', callback: v=>fmtL(v) } },
+        y2: { position: 'right', grid: { display: false }, ticks: { color: '#7de8b0', font:{size:11} } }
+      }
+    }
+  });
+
+  // Course donut
+  const cd = aggregateBy(filterByMonth(DATA.course_monthly), 'COURSE');
+  cd.sort((a,b)=>b.Admissions-a.Admissions);
+  destroyChart('courseDonut');
+  charts['courseDonut'] = new Chart(document.getElementById('courseDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: cd.map(r=>r.COURSE),
+      datasets: [{ data: cd.map(r=>r.Admissions), backgroundColor: COLORS.palette, borderColor: '#181c27', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: true, position: 'right', labels: { color: '#7a8099', font:{size:10}, boxWidth:10, padding:6 } },
+        tooltip: { ...chartDefaults.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} admissions` } }
+      }
+    }
+  });
+
+  // Source donut
+  const sd = aggregateBy(filterByMonth(DATA.source_monthly), 'SOURCE_CAT');
+  sd.sort((a,b)=>b.Admissions-a.Admissions);
+  destroyChart('sourceDonut');
+  charts['sourceDonut'] = new Chart(document.getElementById('sourceDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: sd.map(r=>r.SOURCE_CAT),
+      datasets: [{ data: sd.map(r=>r.Admissions), backgroundColor: COLORS.palette, borderColor: '#181c27', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: true, position: 'right', labels: { color: '#7a8099', font:{size:10}, boxWidth:10, padding:6 } },
+        tooltip: { ...chartDefaults.plugins.tooltip }
+      }
+    }
+  });
+
+  // Country donut
+  const co = aggregateBy(filterByMonth(DATA.country_monthly), 'COUNTRY');
+  co.sort((a,b)=>b.Admissions-a.Admissions);
+  destroyChart('countryDonut');
+  charts['countryDonut'] = new Chart(document.getElementById('countryDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: co.map(r=>r.COUNTRY),
+      datasets: [{ data: co.map(r=>r.Admissions), backgroundColor: COLORS.palette, borderColor: '#181c27', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: true, position: 'right', labels: { color: '#7a8099', font:{size:10}, boxWidth:10, padding:6 } },
+        tooltip: { ...chartDefaults.plugins.tooltip }
+      }
+    }
+  });
+
+  // Gap chart
+  destroyChart('gapChart');
+  charts['gapChart'] = new Chart(document.getElementById('gapChart'), {
+    type: 'bar',
+    data: {
+      labels: MONTHS.map((_,i)=>SHORT[i]),
+      datasets: [
+        { label: 'Spot Collected', data: mt.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.7)', borderRadius: 4 },
+        { label: 'Gap (Outstanding)', data: mt.map(r=>r.Total_Package-r.Total_Spot), backgroundColor: 'rgba(232,125,232,.5)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, labels:{ color:'#7a8099',font:{size:10},boxWidth:10 } }, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { stacked: true, grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',font:{size:11}} },
+        y: { stacked: true, grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',callback:v=>fmtL(v)} }
+      }
+    }
+  });
+}
+
+// ── COURSE VIEW ───────────────────────────────────────────────────────────
+function renderCourse() {
+  const data = aggregateBy(filterByMonth(DATA.course_monthly), 'COURSE');
+  data.sort((a,b)=>b.Total_Package-a.Total_Package);
+
+  destroyChart('courseBarChart');
+  charts['courseBarChart'] = new Chart(document.getElementById('courseBarChart'), {
+    type: 'bar',
+    data: {
+      labels: data.map(r=>r.COURSE),
+      datasets: [
+        { label: 'Package', data: data.map(r=>r.Total_Package), backgroundColor: 'rgba(245,166,35,.7)', borderRadius: 4 },
+        { label: 'Spot', data: data.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.6)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend:{ display:false }, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',callback:v=>fmtL(v)} },
+        y: { grid:{display:false}, ticks:{color:'#e8eaf0',font:{size:12}} }
+      }
+    }
+  });
+
+  // Table
+  const filtered = filterByMonth(DATA.course_monthly).sort((a,b)=>{
+    const mi = MONTHS.indexOf(a.MONTH) - MONTHS.indexOf(b.MONTH);
+    return mi !== 0 ? mi : a.COURSE.localeCompare(b.COURSE);
+  });
+
+  let html = '';
+  let prevMonth = '';
+  const monthTotals = {};
+  DATA.monthly_total.forEach(r => { monthTotals[r.MONTH] = r; });
+
+  filtered.forEach(r => {
+    if (r.MONTH !== prevMonth && selectedMonth === 'ALL') {
+      const mt = monthTotals[r.MONTH];
+      if (mt) {
+        html += `<tr class="total-row"><td class="month-col" colspan="2">${r.MONTH}</td><td class="num">${mt.Admissions}</td><td class="num pkg-val">${fmt(mt.Total_Package)}</td><td class="num spot-val">${fmt(mt.Total_Spot)}</td></tr>`;
+      }
+      prevMonth = r.MONTH;
+    }
+    html += `<tr>
+      <td class="month-col">${selectedMonth === 'ALL' ? '' : r.MONTH}</td>
+      <td class="course-col">${r.COURSE}</td>
+      <td class="num">${r.Admissions}</td>
+      <td class="num pkg-val">${fmt(r.Total_Package)}</td>
+      <td class="num spot-val">${fmt(r.Total_Spot)}</td>
+    </tr>`;
+  });
+  document.getElementById('courseTableBody').innerHTML = html;
+}
+
+// ── SOURCE VIEW ───────────────────────────────────────────────────────────
+function renderSource() {
+  const data = aggregateBy(filterByMonth(DATA.source_monthly), 'SOURCE_CAT');
+  data.sort((a,b)=>b.Total_Package-a.Total_Package);
+
+  destroyChart('sourceBarChart');
+  charts['sourceBarChart'] = new Chart(document.getElementById('sourceBarChart'), {
+    type: 'bar',
+    data: {
+      labels: data.map(r=>r.SOURCE_CAT),
+      datasets: [
+        { label: 'Package', data: data.map(r=>r.Total_Package), backgroundColor: 'rgba(245,166,35,.7)', borderRadius: 4 },
+        { label: 'Spot', data: data.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.6)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend:{display:false}, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',callback:v=>fmtL(v)} },
+        y: { grid:{display:false}, ticks:{color:'#e8eaf0',font:{size:12}} }
+      }
+    }
+  });
+
+  const filtered = filterByMonth(DATA.source_monthly).sort((a,b) => {
+    const mi = MONTHS.indexOf(a.MONTH) - MONTHS.indexOf(b.MONTH);
+    return mi !== 0 ? mi : a.SOURCE_CAT.localeCompare(b.SOURCE_CAT);
+  });
+
+  let html = '';
+  filtered.forEach(r => {
+    html += `<tr>
+      <td class="month-col">${r.MONTH}</td>
+      <td class="source-col">${r.SOURCE_CAT}</td>
+      <td class="num">${r.Admissions}</td>
+      <td class="num pkg-val">${fmt(r.Total_Package)}</td>
+      <td class="num spot-val">${fmt(r.Total_Spot)}</td>
+    </tr>`;
+  });
+  document.getElementById('sourceTableBody').innerHTML = html;
+}
+
+// ── COUNTRY VIEW ──────────────────────────────────────────────────────────
+function renderCountry() {
+  const data = aggregateBy(filterByMonth(DATA.country_monthly), 'COUNTRY');
+  data.sort((a,b)=>b.Total_Package-a.Total_Package);
+
+  destroyChart('countryBarChart');
+  charts['countryBarChart'] = new Chart(document.getElementById('countryBarChart'), {
+    type: 'bar',
+    data: {
+      labels: data.map(r=>r.COUNTRY),
+      datasets: [
+        { label: 'Package', data: data.map(r=>r.Total_Package), backgroundColor: 'rgba(245,166,35,.7)', borderRadius: 4 },
+        { label: 'Spot', data: data.map(r=>r.Total_Spot), backgroundColor: 'rgba(92,158,255,.6)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend:{display:false}, tooltip: chartDefaults.plugins.tooltip },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#7a8099',callback:v=>fmtL(v)} },
+        y: { grid:{display:false}, ticks:{color:'#e8eaf0',font:{size:12}} }
+      }
+    }
+  });
+
+  const filtered = filterByMonth(DATA.country_monthly).sort((a,b) => {
+    const mi = MONTHS.indexOf(a.MONTH) - MONTHS.indexOf(b.MONTH);
+    return mi !== 0 ? mi : a.COUNTRY.localeCompare(b.COUNTRY);
+  });
+
+  let html = '';
+  filtered.forEach(r => {
+    html += `<tr>
+      <td class="month-col">${r.MONTH}</td>
+      <td class="country-col">${r.COUNTRY}</td>
+      <td class="num">${r.Admissions}</td>
+      <td class="num pkg-val">${fmt(r.Total_Package)}</td>
+      <td class="num spot-val">${fmt(r.Total_Spot)}</td>
+    </tr>`;
+  });
+  document.getElementById('countryTableBody').innerHTML = html;
+}
+
+// ── DETAIL TABLE ──────────────────────────────────────────────────────────
+function renderDetail() {
+  const filtered = filterByMonth(DATA.course_monthly).sort((a,b)=>{
+    const mi = MONTHS.indexOf(a.MONTH) - MONTHS.indexOf(b.MONTH);
+    return mi !== 0 ? mi : a.COURSE.localeCompare(b.COURSE);
+  });
+
+  const monthTotals = {};
+  DATA.monthly_total.forEach(r => { monthTotals[r.MONTH] = r; });
+
+  let html = '';
+  let prevMonth = '';
+
+  filtered.forEach(r => {
+    if (r.MONTH !== prevMonth && selectedMonth === 'ALL') {
+      const mt = monthTotals[r.MONTH];
+      if (mt) {
+        html += `<tr class="total-row">
+          <td class="month-col">${r.MONTH} TOTAL</td>
+          <td>— All Courses —</td>
+          <td class="num">${mt.Admissions}</td>
+          <td class="num pkg-val">${fmt(mt.Total_Package)}</td>
+          <td class="num spot-val">${fmt(mt.Total_Spot)}</td>
+          <td class="num" style="color:#e87de8">${fmt(mt.Total_Package-mt.Total_Spot)}</td>
+        </tr>`;
+      }
+      prevMonth = r.MONTH;
+    }
+    const gap = r.Total_Package - r.Total_Spot;
+    html += `<tr>
+      <td class="month-col">${selectedMonth === 'ALL' ? '' : r.MONTH}</td>
+      <td class="course-col">${r.COURSE}</td>
+      <td class="num">${r.Admissions}</td>
+      <td class="num pkg-val">${fmt(r.Total_Package)}</td>
+      <td class="num spot-val">${fmt(r.Total_Spot)}</td>
+      <td class="num" style="color:#e87de8">${fmt(gap)}</td>
+    </tr>`;
+  });
+  document.getElementById('detailBody').innerHTML = html;
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────
+function renderAll() {
+  renderKPI();
+  if (activeTab === 'overview') renderOverview();
+  if (activeTab === 'course') renderCourse();
+  if (activeTab === 'source') renderSource();
+  if (activeTab === 'country') renderCountry();
+  if (activeTab === 'detail') renderDetail();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+buildMonthBar();
+renderAll();
+</script>
+</body>
+</html>
